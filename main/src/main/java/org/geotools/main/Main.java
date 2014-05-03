@@ -3,6 +3,7 @@ package org.geotools.main;
 import handlers.ExportShapeFileAction;
 
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -23,8 +24,8 @@ import org.geotools.swing.action.PanAction;
 import org.geotools.swing.action.ResetAction;
 import org.opengis.feature.simple.SimpleFeature;
 
-import SetsRelated.GeometrySet;
-import SetsRelated.IntersectTest;
+import setsRelated.GeometrySet;
+import setsRelated.IntersectTest;
 
 import com.vividsolutions.jts.geom.*;
 

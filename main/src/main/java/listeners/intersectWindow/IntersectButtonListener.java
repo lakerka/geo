@@ -1,6 +1,6 @@
 package listeners.intersectWindow;
 
-import handlers.IntersectWindowHandler;
+import handlers.IntersectHandler;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,10 +12,10 @@ import windows.intersect.IntersectWindow;
 //used to intersect layers from insertesct window
 public class IntersectButtonListener implements ActionListener {
     
-    private IntersectWindowHandler intersectWindowHandler;
+    private IntersectHandler intersectWindowHandler;
 
     public IntersectButtonListener(
-            IntersectWindowHandler intersectWindowHandler) {
+            IntersectHandler intersectWindowHandler) {
         
         super();
         

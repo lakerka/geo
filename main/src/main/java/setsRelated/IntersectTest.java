@@ -1,4 +1,4 @@
-package SetsRelated;
+package setsRelated;
 
 import handlers.MapHandler;
 

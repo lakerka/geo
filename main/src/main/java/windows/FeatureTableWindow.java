@@ -35,6 +35,7 @@ import listeners.mainWindow.DisplaySelectedFeaturesMenuItemListener;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.main.FeatureCollectionTableModelExtended;
 import org.geotools.main.Roles;
@@ -333,7 +334,7 @@ public class FeatureTableWindow extends JFrame {
     }
 
     // display selected featured from map to table
-    public void displaySelectedFeatures() {
+    public int displaySelectedFeatures() {
 
         try {
 
@@ -343,27 +344,20 @@ public class FeatureTableWindow extends JFrame {
             List<SimpleFeature> selectedFeatures = new ArrayList<SimpleFeature>();
             selectedFeatures.addAll(this.selectHandler.getSelectedFeatures());
 
-            List<SimpleFeature> selectedFeaturesOfParticularLayer = new ArrayList<SimpleFeature>();
-
-            if (!selectedFeatures.isEmpty() && !layersOpenForSelect.isEmpty()) {
-
-                Layer layer = layersOpenForSelect.get(0);
-
-                Set<SimpleFeature> simpleFeatureSet = this.selectHandler
-                        .getFeaturesBelongingToLayer(layer, selectedFeatures);
-
-                selectedFeaturesOfParticularLayer.addAll(simpleFeatureSet);
-
-            }
 
             FeatureCollectionTableModelExtended tableModel = new FeatureCollectionTableModelExtended(
-                    DataUtilities.collection(selectedFeaturesOfParticularLayer));
+                    DataUtilities.collection(selectedFeatures));
 
             setTableModel(tableModel);
+            
+            return 1;
 
-        } catch (NullPointerException nullPointerException) {
-            // no features selected
+        } catch (Exception exception) {
+            
+            exception.printStackTrace();
         }
+        
+        return 0;
     }
 
     public List<SimpleFeature> getSelectedTableFeatures() {
@@ -417,6 +411,12 @@ public class FeatureTableWindow extends JFrame {
 
         String layerName = JOptionPane.showInputDialog("Enter a layer name");
         return layerName;
+
+    }
+    
+    public void displayPopUpBox(String message) {
+
+        JOptionPane.showMessageDialog(this, message);
 
     }
 

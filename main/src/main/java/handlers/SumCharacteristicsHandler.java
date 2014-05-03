@@ -1,6 +1,7 @@
 package handlers;
 
-import java.io.File;
+import interfaces.ICommonOperations;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,18 +11,13 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.main.Support;
 import org.geotools.map.Layer;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.type.Name;
-
 import com.vividsolutions.jts.geom.Geometry;
 
-import SetsRelated.GeometrySet;
 import windows.Command;
-import windows.FeatureTableWindow;
 import windows.SumCharacteristicsWindow;
-import windows.intersect.IntersectWindow;
 import windows.intersect.LayerJListPanel;
 
-public class SumCharacteristicsHandler {
+public class SumCharacteristicsHandler implements ICommonOperations {
 
     private LayerJListPanel layerJListPanel;
     private SumCharacteristicsWindow sumCharacteristicsWindow;
@@ -65,7 +61,7 @@ public class SumCharacteristicsHandler {
         return 0;
     }
 
-    public int removeSelectedFromJpanel() {
+    public int removeSelected() {
 
         try {
 
@@ -284,9 +280,9 @@ public class SumCharacteristicsHandler {
         }
 
         Command propertyCommand = null;
-        
+
         switch (command) {
-        
+
         case GET_LENGTH_RATIO:
             propertyCommand = Command.GET_LENGTH;
             break;
@@ -299,7 +295,8 @@ public class SumCharacteristicsHandler {
         BigDecimal layer1PropertySum = sumProperty(layer1, propertyCommand);
         BigDecimal layer2PropertySum = sumProperty(layer2, propertyCommand);
 
-        return layer1PropertySum.divide(layer2PropertySum, divisionPrecision, BigDecimal.ROUND_HALF_UP);
+        return layer1PropertySum.divide(layer2PropertySum, divisionPrecision,
+                BigDecimal.ROUND_HALF_UP);
     }
 
     private int displayTwoRatios(Layer layer1, Layer layer2,
@@ -310,8 +307,9 @@ public class SumCharacteristicsHandler {
             displaySingleRatio(layer1, layer2, layer1DividedByLayer2, command);
 
             BigDecimal one = new BigDecimal(1);
-            BigDecimal layer2DividedByLayer1 = one
-                    .divide(layer1DividedByLayer2, divisionPrecision, BigDecimal.ROUND_HALF_UP);
+            BigDecimal layer2DividedByLayer1 = one.divide(
+                    layer1DividedByLayer2, divisionPrecision,
+                    BigDecimal.ROUND_HALF_UP);
 
             displaySingleRatio(layer2, layer1, layer2DividedByLayer1, command);
 
@@ -347,5 +345,12 @@ public class SumCharacteristicsHandler {
         }
 
         return 0;
+    }
+
+    public int addSelectedLayersToMap() {
+
+        throw new UnsupportedOperationException(
+                "Method not implemented!");
+
     }
 }

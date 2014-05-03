@@ -14,18 +14,17 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+import listeners.common.AddLayerFromFileListener;
+import listeners.common.AddSelectedLayersFromMapListener;
+import listeners.common.AddSelectedLayersToMapListener;
+import listeners.common.RemoveSelectedListener;
 import listeners.featureTableWindow.AddLayersFromMapToAttributeTableListener;
 import listeners.featureTableWindow.FilterTableContentMenuItemListener;
 import listeners.featureTableWindow.OpenFileMenuItemListener;
 import listeners.featureTableWindow.SelectInMapSelectedInTableListener;
-import listeners.intersectWindow.AddFromFileToSelectFromButtonListener;
-import listeners.intersectWindow.AddSelectedLayersFromMapListener;
-import listeners.intersectWindow.AddSelectedToMapButtonListener;
 import listeners.intersectWindow.IntersectButtonListener;
-import listeners.intersectWindow.RemoveFromSelectedButtonListener;
 import listeners.mainWindow.DisplaySelectedFeaturesMenuItemListener;
 import listeners.mainWindow.ExportLayerButtonListener;
-import listeners.sumCharackteristics.AddSelectedLayerFromMapListener;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.simple.SimpleFeatureSource;
@@ -38,13 +37,13 @@ import org.geotools.swing.action.SafeAction;
 
 import windows.FeatureTableWindow;
 import handlers.FeatureTableHandler;
-import handlers.IntersectWindowHandler;
+import handlers.IntersectHandler;
 import handlers.MapHandler;
 import handlers.SelectHandler;
 
 public class IntersectWindow extends JFrame {
 
-    public handlers.IntersectWindowHandler intersectWindowHandler;
+    public handlers.IntersectHandler intersectWindowHandler;
 
     public FeatureTableWindow featureTableWindow;
     public LayerJListPanel layerJListPanel;
@@ -56,7 +55,7 @@ public class IntersectWindow extends JFrame {
                 mapHandler);
 
         this.mapHandler = mapHandler;
-        
+
         JList<Layer> list;
 
         // add menu bar
@@ -65,39 +64,38 @@ public class IntersectWindow extends JFrame {
 
         DefaultListModel<Layer> listModel = new DefaultListModel<Layer>();
 
-
         layerJListPanel = new LayerJListPanel(listModel,
                 "Layers to select from");
 
-        this.intersectWindowHandler = new IntersectWindowHandler(
+        this.intersectWindowHandler = new IntersectHandler(
                 this.featureTableWindow, this.layerJListPanel, this, mapHandler);
 
         JPanel buttonPane = new JPanel();
 
         createButtonAndAddToButtonPane("Add selected layers from map",
-                new AddSelectedLayersFromMapListener(this.intersectWindowHandler),
-                buttonPane);
-        
+                new AddSelectedLayersFromMapListener(
+                        this.intersectWindowHandler), buttonPane);
+
         createButtonAndAddToButtonPane("Add layer from file",
-                new AddFromFileToSelectFromButtonListener(
-                        this.intersectWindowHandler), buttonPane);
+                new AddLayerFromFileListener(this.intersectWindowHandler),
+                buttonPane);
         createButtonAndAddToButtonPane("Remove selected",
-                new RemoveFromSelectedButtonListener(
-                        this.intersectWindowHandler), buttonPane);
+                new RemoveSelectedListener(this.intersectWindowHandler),
+                buttonPane);
         createButtonAndAddToButtonPane("Intersect selected",
                 new IntersectButtonListener(this.intersectWindowHandler),
                 buttonPane);
-        
-        //add selected layers to map
-        createButtonAndAddToButtonPane("Add selected to map",
-                new AddSelectedToMapButtonListener(this.intersectWindowHandler),
+
+        // add selected layers to map
+        createButtonAndAddToButtonPane(
+                "Add selected to map",
+                new AddSelectedLayersToMapListener(this.intersectWindowHandler),
                 buttonPane);
-        
+
         // Put everything together, using the content pane's BorderLayout.
         Container contentPane = getContentPane();
         contentPane.add(layerJListPanel, BorderLayout.CENTER);
         contentPane.add(buttonPane, BorderLayout.PAGE_END);
-        
 
         pack();
 
@@ -122,7 +120,7 @@ public class IntersectWindow extends JFrame {
 
         return 1;
     }
-    
+
     public String getNameOfLayerToExport() {
         String name = JOptionPane.showInputDialog("Enter a layer name");
         return name;

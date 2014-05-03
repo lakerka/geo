@@ -1,21 +1,27 @@
-package SetsRelated;
+package setsRelated;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureFactory;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.feature.type.GeometryDescriptorImpl;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.main.Support;
 import org.geotools.process.vector.IntersectionFeatureCollection;
 import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -24,56 +30,81 @@ import com.vividsolutions.jts.geom.Geometry;
 public class IntersectSimpleFeaturesThread implements Runnable {
 
     // private Thread thread;
-    private String threadName;
-    private final SimpleFeatureCollection simpleFeatureList1;
-    private final SimpleFeatureCollection simpleFeatureList2;
+    private String runnableName;
+    private SimpleFeatureCollection simpleFeatureList1;
+
+    private SimpleFeatureCollection simpleFeatureList2;
     private List<SimpleFeature> localSimpleFeatureList;
     private List<SimpleFeature> globalIntersectSimpleFeatureList;
     private SimpleFeatureType simpleFeatureType;
-    private int id;
+    private long id;
+    private InverseSemaphore inverseSemaphore;
 
     public IntersectSimpleFeaturesThread(String name,
             SimpleFeatureCollection simpleFeatureList1,
             SimpleFeatureCollection simpleFeatureList2,
-            List<SimpleFeature> intersectSimpleFeatureList, int id) {
+            List<SimpleFeature> intersectSimpleFeatureList, long id, InverseSemaphore inverseSemaphore) {
 
-        this.threadName = name;
+        this.runnableName = name;
         this.simpleFeatureList1 = simpleFeatureList1;
         this.simpleFeatureList2 = simpleFeatureList2;
         this.globalIntersectSimpleFeatureList = intersectSimpleFeatureList;
         this.localSimpleFeatureList = new ArrayList<SimpleFeature>();
         this.id = id;
-        System.out.println("Creating " + this.threadName);
+        this.inverseSemaphore = inverseSemaphore;
+        System.out.println("Creating " + this.runnableName);
     }
 
     public String getThreadName() {
-        return this.threadName;
+        return this.runnableName;
     }
 
-    private int getId() {
+    private long getId() {
         return this.id++;
     }
 
     public void run() {
-        IntersectionFeatureCollection ifc = new IntersectionFeatureCollection();
-        SimpleFeatureIterator iter;
 
-        SimpleFeatureCollection kk = ifc.execute(simpleFeatureList1,
-                simpleFeatureList2, null, null, null, null, null);
-        iter = kk.features();
-        
-        for (; iter.hasNext();) {
+        try {
+            System.out.println("Starting " + this.runnableName);
+            // intersection of empty set and something will not produce any
+            // results
+            if (simpleFeatureList1.isEmpty() || simpleFeatureList2.isEmpty()) {
+                return;
+            }
 
-            SimpleFeature sf = iter.next();
+            this.simpleFeatureList2 = filterSimpleFeatureCollection(
+                    simpleFeatureList1, simpleFeatureList2);
+
+            IntersectionFeatureCollection ifc = new IntersectionFeatureCollection();
+            SimpleFeatureIterator iter;
+
+            SimpleFeatureCollection kk = ifc.execute(simpleFeatureList1,
+                    simpleFeatureList2, null, null, null, null, null);
+            iter = kk.features();
+
+            for (; iter.hasNext();) {
+
+                SimpleFeature sf = iter.next();
+
+                SimpleFeatureBuilder builder = new SimpleFeatureBuilder(
+                        sf.getFeatureType());
+
+                builder.addAll(sf.getAttributes());
+                localSimpleFeatureList.add(builder.buildFeature("" + getId()));
+            }
+            this.globalIntersectSimpleFeatureList
+                    .addAll(localSimpleFeatureList);
+        } catch (Exception exception) {
+
+            exception.printStackTrace();
             
-            SimpleFeatureBuilder builder = new SimpleFeatureBuilder(
-                    sf.getFeatureType());
-
+        } finally {
             
-            builder.addAll(sf.getAttributes());
-            localSimpleFeatureList.add(builder.buildFeature("" + getId()));
+            this.inverseSemaphore.taskCompleted();
+            
+            System.out.println("Ending " + this.runnableName);
         }
-        this.globalIntersectSimpleFeatureList.addAll(localSimpleFeatureList);
     }
 
     // public void run() {
@@ -263,6 +294,46 @@ public class IntersectSimpleFeaturesThread implements Runnable {
         }
 
         return 0;
+    }
+
+    public void setThreadName(String threadName) {
+        this.runnableName = threadName;
+    }
+
+    public SimpleFeatureCollection filterSimpleFeatureCollection(
+            SimpleFeatureCollection simpleFeatureCollection,
+            SimpleFeatureCollection collectionToFilter) {
+
+        try {
+
+            ReferencedEnvelope referencedEnvelope = new ReferencedEnvelope(
+                    simpleFeatureCollection.getBounds(),
+                    simpleFeatureCollection.getSchema()
+                            .getCoordinateReferenceSystem());
+
+            FilterFactory2 filterFactory2 = CommonFactoryFinder
+                    .getFilterFactory2();
+
+            String geometryDescriptorLocalName = simpleFeatureCollection
+                    .getSchema().getGeometryDescriptor().getLocalName();
+
+            Filter filter = filterFactory2.bbox(
+                    filterFactory2.property(geometryDescriptorLocalName),
+                    referencedEnvelope);
+
+            SimpleFeatureCollection filteredCollection = collectionToFilter
+                    .subCollection(filter);
+
+            if (filteredCollection == null) {
+                throw new IllegalArgumentException("Filtering returned null!");
+            }
+
+            return filteredCollection;
+
+        } catch (Exception exception) {
+
+            return collectionToFilter;
+        }
     }
 
 }

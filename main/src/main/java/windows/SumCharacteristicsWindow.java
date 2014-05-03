@@ -1,6 +1,6 @@
 package windows;
 
-import handlers.IntersectWindowHandler;
+import handlers.IntersectHandler;
 import handlers.MapHandler;
 import handlers.SelectHandler;
 import handlers.SumCharacteristicsHandler;
@@ -27,13 +27,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.Border;
 
-import listeners.intersectWindow.AddFromFileToSelectFromButtonListener;
-import listeners.intersectWindow.AddSelectedToMapButtonListener;
-import listeners.intersectWindow.IntersectButtonListener;
-import listeners.intersectWindow.RemoveFromSelectedButtonListener;
-import listeners.sumCharackteristics.AddLayerFromFileListener;
-import listeners.sumCharackteristics.AddSelectedLayerFromMapListener;
-import listeners.sumCharackteristics.RemoveSelectedListener;
+import listeners.common.AddLayerFromFileListener;
+import listeners.common.AddSelectedLayersFromMapListener;
+import listeners.common.RemoveSelectedListener;
 import listeners.sumCharackteristics.SetCommandListener;
 import listeners.sumCharackteristics.SumCharacteristicsListener;
 
@@ -76,7 +72,7 @@ public class SumCharacteristicsWindow extends JFrame {
 
         // add layers that are selected in map
         createButtonAndAddToButtonPane("Add selected layers from map",
-                new AddSelectedLayerFromMapListener(
+                new AddSelectedLayersFromMapListener(
                         this.sumCharackteristicsHandler), buttonPane);
 
         // remove selected layer

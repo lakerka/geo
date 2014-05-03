@@ -1,6 +1,6 @@
 package listeners.mainWindow;
 
-import handlers.IntersectWindowHandler;
+import handlers.IntersectHandler;
 import handlers.MapHandler;
 
 import java.awt.event.ActionEvent;

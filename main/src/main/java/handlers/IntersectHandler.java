@@ -1,5 +1,7 @@
 package handlers;
 
+import interfaces.ICommonOperations;
+
 import java.io.File;
 import java.util.List;
 
@@ -7,19 +9,19 @@ import org.geotools.main.Main;
 import org.geotools.main.Support;
 import org.geotools.map.Layer;
 
-import SetsRelated.GeometrySet;
+import setsRelated.GeometrySet;
 import windows.FeatureTableWindow;
 import windows.intersect.IntersectWindow;
 import windows.intersect.LayerJListPanel;
 
-public class IntersectWindowHandler {
+public class IntersectHandler implements ICommonOperations {
 
     public FeatureTableWindow featureTableWindow;
     public LayerJListPanel layerJListPanel;
     public IntersectWindow intersectWindow;
     public MapHandler mapHandler;
 
-    public IntersectWindowHandler(FeatureTableWindow featureTableWindow,
+    public IntersectHandler(FeatureTableWindow featureTableWindow,
             LayerJListPanel layerJListPanel, IntersectWindow intersectWindow,
             MapHandler mapHandler) {
 
@@ -55,7 +57,7 @@ public class IntersectWindowHandler {
         return 0;
     }
 
-    public int removeSelectedFromJpanel() {
+    public int removeSelected() {
 
         try {
 
