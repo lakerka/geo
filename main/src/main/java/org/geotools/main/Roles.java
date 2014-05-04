@@ -9,11 +9,11 @@ public enum Roles {
     OpenFile("Open file"),
     GetFeatures("Get features"),
     CountRows("Count rows"),
-    DisplaySelectedFeatures("Display selected features"),
+    DisplaySelectedFeatures("Get selected in map features"),
     SelectInMapSelectedInTable("Select in map selected in table features"),
-    DisplayAttributeTable("Display attribute table"),
+    DisplayAttributeTable("Attribute table"),
     AddLayersFromMap("Add layers from map"),
-    DisplayIntersectWindow("Display intersect window");
+    DisplayIntersectWindow("Intersect");
     
     public final String label;
 	

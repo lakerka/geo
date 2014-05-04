@@ -18,6 +18,7 @@ import javax.swing.JToolBar;
 
 import listeners.mainWindow.AddLayerButtonListener;
 import listeners.mainWindow.DisplayAttributeTableButtonListener;
+import listeners.mainWindow.DisplayGroupFeaturesWindow;
 import listeners.mainWindow.DisplayIntersectWindowButtonListener;
 import listeners.mainWindow.DisplaySumCharackteristicsWindowListener;
 import listeners.mainWindow.ExportLayerButtonListener;
@@ -41,6 +42,7 @@ public class MainWindow {
     public ZoomToSelectHandler zoomToSelectHandler;
     public FeatureTableWindow featureTableWindow;
     public SumCharacteristicsWindow sumCharacteristicsWindow;
+    private GroupFeaturesWindow groupFeaturesWindow;
 
     public MainWindow(SimpleFeatureSource featureSource, int windowLength,
             int windowHeight) {
@@ -92,6 +94,8 @@ public class MainWindow {
         this.sumCharacteristicsWindow = new SumCharacteristicsWindow(
                 this.mapHandler);
 
+        this.groupFeaturesWindow = new GroupFeaturesWindow(this.mapHandler);
+
         // add attribute table window button
         addButtonToToolBar(
                 Roles.DisplayAttributeTable.label,
@@ -104,14 +108,18 @@ public class MainWindow {
                         this.selectHandler, this.mapHandler)), toolbar);
 
         // add [export selected and visible] button window button
-        addButtonToToolBar("Export layer", new ExportLayerButtonListener(
+        addButtonToToolBar("Export", new ExportLayerButtonListener(
                 this.mapHandler), toolbar);
 
         // add button for displaying sumCharackteristics window
-        addButtonToToolBar("Sum charackteristics",
+        addButtonToToolBar("Summary",
                 new DisplaySumCharackteristicsWindowListener(
                         this.sumCharacteristicsWindow), toolbar);
-        
+
+        // add button for displaying group by feature attribute window
+        addButtonToToolBar("Group", new DisplayGroupFeaturesWindow(
+                this.groupFeaturesWindow), toolbar);
+
         this.mapFrame.setVisible(true);
     }
 

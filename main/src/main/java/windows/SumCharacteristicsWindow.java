@@ -1,23 +1,17 @@
 package windows;
 
-import handlers.IntersectHandler;
 import handlers.MapHandler;
-import handlers.SelectHandler;
 import handlers.SumCharacteristicsHandler;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -25,7 +19,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.border.Border;
 
 import listeners.common.AddLayerFromFileListener;
 import listeners.common.AddSelectedLayersFromMapListener;
@@ -33,27 +26,31 @@ import listeners.common.RemoveSelectedListener;
 import listeners.sumCharackteristics.SetCommandListener;
 import listeners.sumCharackteristics.SumCharacteristicsListener;
 
-import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.main.Support;
 import org.geotools.map.Layer;
 
 import windows.intersect.LayerJListPanel;
 
 public class SumCharacteristicsWindow extends JFrame {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6803473575112496352L;
+    
+    
     private MapHandler mapHandler;
     private SumCharacteristicsHandler sumCharackteristicsHandler;
     private LayerJListPanel layerJListPanel;
 
-    // TODO uzbaigti inicializacija
     public SumCharacteristicsWindow(MapHandler mapHandler) {
 
+        this.setTitle("Summarize");
+        
         this.mapHandler = mapHandler;
         this.layerJListPanel = new LayerJListPanel("Layers to select from");
         this.sumCharackteristicsHandler = new SumCharacteristicsHandler(
                 this.layerJListPanel, this, this.mapHandler);
 
-        JList<Layer> list;
 
         // add menu bar
         JMenuBar menubar = new JMenuBar();

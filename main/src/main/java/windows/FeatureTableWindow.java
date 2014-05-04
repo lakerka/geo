@@ -59,6 +59,8 @@ public class FeatureTableWindow extends JFrame {
 
     public FeatureTableWindow(SelectHandler selectHandler, MapHandler mapHandler) {
 
+        this.setTitle("Feature table");
+        
         if (selectHandler == null) {
             throw new IllegalArgumentException(
                     "selectHandler must not be null!");

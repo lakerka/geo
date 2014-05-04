@@ -51,6 +51,8 @@ public class IntersectWindow extends JFrame {
 
     public IntersectWindow(SelectHandler selectHandler, MapHandler mapHandler) {
 
+        this.setTitle("Intersect");
+        
         this.featureTableWindow = new FeatureTableWindow(selectHandler,
                 mapHandler);
 

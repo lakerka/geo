@@ -6,6 +6,7 @@ import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,8 +36,10 @@ import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeImpl;
 import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.jts.FactoryFinder;
 import org.geotools.map.FeatureLayer;
 import org.geotools.map.Layer;
+import org.geotools.process.vector.TransformProcess;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
 import org.geotools.swing.data.JFileDataStoreChooser;
@@ -50,6 +53,12 @@ import org.opengis.filter.identity.FeatureId;
 import org.opengis.util.InternationalString;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 
 public class Support {
 
@@ -554,12 +563,33 @@ public class Support {
             SimpleFeatureCollection simpleFeatureCollection = DataUtilities
                     .collection(simpleFeatureList);
 
+            return Support
+                    .simpleFeatureCollectionToLayer(simpleFeatureCollection);
+
+        } catch (Exception exception) {
+
+            exception.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Layer simpleFeatureCollectionToLayer(
+            SimpleFeatureCollection simpleFeatureCollection) {
+
+        if (simpleFeatureCollection == null
+                || simpleFeatureCollection.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "simpleFeatureCollection must not be null or empty");
+        }
+
+        try {
+
             SimpleFeatureSource simpleFeatureSource = DataUtilities
                     .source(simpleFeatureCollection);
 
             Layer layer = Support
                     .simpleFeatureSourceToLayer(simpleFeatureSource);
-
+            
             return layer;
 
         } catch (Exception exception) {
@@ -583,14 +613,214 @@ public class Support {
 
                 layerName = layer.getFeatureSource().getName().toString();
             }
-            
+
             return layerName;
-            
+
         } catch (Exception exception) {
 
             exception.printStackTrace();
         }
-        
+
         return null;
     }
+
+    static boolean isPolygonOrMultiPolygonOrLineOrMultiLine(Class geometryType) {
+
+        if (geometryType == null) {
+            throw new IllegalArgumentException("geometryType must not be null!");
+        }
+
+        return isGeometryTypeIn(geometryType, MultiPolygon.class,
+                Polygon.class, MultiLineString.class, LineString.class);
+
+    }
+
+    static boolean isPolygonOrMultiPolygon(Class geometryType) {
+
+        if (geometryType == null) {
+            throw new IllegalArgumentException("geometryType must not be null!");
+        }
+
+        return isGeometryTypeIn(geometryType, MultiPolygon.class, Polygon.class);
+
+    }
+
+    static boolean isLineOrMultiLine(Class geometryType) {
+
+        if (geometryType == null) {
+            throw new IllegalArgumentException("geometryType must not be null!");
+        }
+
+        return isGeometryTypeIn(geometryType, MultiLineString.class,
+                LineString.class);
+
+    }
+
+    static boolean isGeometryTypeIn(Class test, Class... targets) {
+
+        if (targets == null) {
+            throw new IllegalArgumentException("targets must not be null!");
+        }
+
+        for (Class target : targets) {
+
+            if (target.isAssignableFrom(test)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // public static List<Geometry> getGeometriesList(Geometry geometry) {
+    //
+    // if (geometry == null) {
+    // throw new IllegalArgumentException("geometry must not be null!");
+    // }
+    //
+    // try {
+    //
+    // List<Geometry> geometryList = new ArrayList<Geometry>();
+    //
+    // for (int i = 0; i < geometry.getNumGeometries(); i++) {
+    //
+    // Geometry currentGeoemGeometry = geometry.getGeometryN(i);
+    //
+    // geometryList.add(currentGeoemGeometry);
+    // }
+    //
+    // return geometryList;
+    //
+    // } catch (Exception e) {
+    //
+    // e.printStackTrace();
+    // }
+    //
+    // return null;
+    // }
+
+    // TODO test if works
+    // public static GeometryCollection getGeometriesCollection(Geometry
+    // geometry) {
+    //
+    // if (geometry == null) {
+    // throw new IllegalArgumentException("geometry must not be null!");
+    // }
+    //
+    // try {
+    //
+    // List<Geometry> geomCollection = Support.getGeometriesList(geometry);
+    //
+    // GeometryFactory geometryFactory = new GeometryFactory();
+    //
+    // GeometryCollection geometryCollection = new GeometryCollection(
+    // GeometryFactory.toGeometryArray(geomCollection),
+    // geometryFactory);
+    //
+    // return geometryCollection;
+    //
+    // } catch (Exception e) {
+    //
+    // e.printStackTrace();
+    // }
+    //
+    // return null;
+    // }
+
+    public static Geometry combineIntoOneGeometry(
+            Collection<Geometry> collectionGeometry) {
+
+        try {
+
+            GeometryFactory factory = new GeometryFactory();
+
+            // note the following geometry collection may be invalid (say with
+            // overlapping polygons)
+            GeometryCollection geometryCollection = (GeometryCollection) factory
+                    .buildGeometry(collectionGeometry);
+
+            Geometry union = geometryCollection.union();
+
+            return union;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static SimpleFeatureCollection addAreaColumn(
+            SimpleFeatureCollection simpleFeatureCollection, String columnName) {
+
+        if (simpleFeatureCollection == null || columnName.isEmpty()) {
+            throw new IllegalArgumentException("Invalid arguments!");
+        }
+
+        try {
+
+            String transform = Support
+                    .getSimpleFeatureTypeString(simpleFeatureCollection
+                            .getSchema());
+
+            String geometryLocalName = simpleFeatureCollection.getSchema()
+                    .getGeometryDescriptor().getLocalName();
+
+            transform = transform + "\n" + columnName + "=" + "area("
+                    + geometryLocalName + " )";
+
+            TransformProcess process = new TransformProcess();
+
+            SimpleFeatureCollection resultFeatureCollection = process.execute(
+                    simpleFeatureCollection, transform);
+
+            return resultFeatureCollection;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    public static String getSimpleFeatureTypeString(
+            SimpleFeatureType simpleFeatureType) {
+
+        if (simpleFeatureType == null) {
+            throw new IllegalArgumentException(
+                    "simpleFeatureType must not be null!");
+        }
+
+        try {
+
+            List<AttributeDescriptor> attributeDescriptorList = simpleFeatureType
+                    .getAttributeDescriptors();
+
+            String simpleFeatureTypeString = new String("");
+
+            for (int i = 0; i < attributeDescriptorList.size(); i++) {
+
+                AttributeDescriptor attributeDescriptor = attributeDescriptorList
+                        .get(i);
+
+                String localName = attributeDescriptor.getLocalName();
+
+                if (i != 0) {
+                    simpleFeatureTypeString += "\n";
+                }
+
+                simpleFeatureTypeString = simpleFeatureTypeString + localName
+                        + "=" + localName;
+            }
+
+            return simpleFeatureTypeString;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

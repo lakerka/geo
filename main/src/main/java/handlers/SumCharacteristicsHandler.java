@@ -92,6 +92,7 @@ public class SumCharacteristicsHandler implements ICommonOperations {
                 if (layerList.size() < 2) {
                     this.sumCharacteristicsWindow
                             .displayPopUpBox("Select 2 layers!");
+                    return null;
                 }
 
                 Layer layer1 = layerList.get(0);
