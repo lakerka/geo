@@ -4,14 +4,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import windows.FeatureTableWindow;
-import windows.SumCharacteristicsWindow;
+import windows.SummarizeWindow;
 
 public class DisplaySumCharackteristicsWindowListener implements ActionListener {
 
-    private SumCharacteristicsWindow sumCharacteristicsWindow;
+    private SummarizeWindow sumCharacteristicsWindow;
 
     public DisplaySumCharackteristicsWindowListener(
-            SumCharacteristicsWindow sumCharacteristicsWindow) {
+            SummarizeWindow sumCharacteristicsWindow) {
 
         super();
 

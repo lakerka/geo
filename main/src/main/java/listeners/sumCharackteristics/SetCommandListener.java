@@ -1,20 +1,20 @@
 package listeners.sumCharackteristics;
 
-import handlers.SumCharacteristicsHandler;
+import handlers.SummarizeHandler;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import windows.Command;
-import windows.SumCharacteristicsWindow;
+import windows.SummarizeWindow;
 
 public class SetCommandListener implements ActionListener {
 
-    private SumCharacteristicsHandler sumCharackteristicsHandler;
+    private SummarizeHandler sumCharackteristicsHandler;
     private Command command;
 
     public SetCommandListener(
-            SumCharacteristicsHandler sumCharackteristicsHandler,
+            SummarizeHandler sumCharackteristicsHandler,
             Command command) {
 
         super();

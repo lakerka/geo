@@ -1,16 +1,16 @@
 package listeners.sumCharackteristics;
 
-import handlers.SumCharacteristicsHandler;
+import handlers.SummarizeHandler;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class SumCharacteristicsListener implements ActionListener {
 
-    private SumCharacteristicsHandler sumCharackteristicsHandler;
+    private SummarizeHandler sumCharackteristicsHandler;
 
     public SumCharacteristicsListener(
-            SumCharacteristicsHandler sumCharackteristicsHandler) {
+            SummarizeHandler sumCharackteristicsHandler) {
 
         super();
 

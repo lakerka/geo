@@ -1,56 +1,77 @@
 package windows;
 
+import handlers.FeatureTableHandler;
 import handlers.MapHandler;
-import handlers.SumCharacteristicsHandler;
+import handlers.SelectHandler;
+import handlers.SummarizeHandler;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 import listeners.common.AddLayerFromFileListener;
 import listeners.common.AddSelectedLayersFromMapListener;
 import listeners.common.RemoveSelectedListener;
+import listeners.featureTableWindow.AddLayersFromMapToAttributeTableListener;
+import listeners.featureTableWindow.AddSelectedFeaturesAsNewLayerListener;
+import listeners.featureTableWindow.FilterTableContentMenuItemListener;
+import listeners.featureTableWindow.OpenFileMenuItemListener;
+import listeners.featureTableWindow.SelectInMapSelectedInTableListener;
+import listeners.mainWindow.DisplaySelectedFeaturesMenuItemListener;
 import listeners.sumCharackteristics.SetCommandListener;
 import listeners.sumCharackteristics.SumCharacteristicsListener;
 
+import org.geotools.data.DataStore;
+import org.geotools.main.Roles;
 import org.geotools.map.Layer;
 
 import windows.intersect.LayerJListPanel;
 
-public class SumCharacteristicsWindow extends JFrame {
+public class SummarizeWindow extends JFrame {
 
     /**
      * 
      */
     private static final long serialVersionUID = -6803473575112496352L;
-    
-    
-    private MapHandler mapHandler;
-    private SumCharacteristicsHandler sumCharackteristicsHandler;
-    private LayerJListPanel layerJListPanel;
 
-    public SumCharacteristicsWindow(MapHandler mapHandler) {
+    private MapHandler mapHandler;
+    private SummarizeHandler summarizeHandler;
+    private LayerJListPanel layerJListPanel;
+    private JTable jTable;
+
+    public SummarizeWindow(MapHandler mapHandler) {
 
         this.setTitle("Summarize");
-        
+
         this.mapHandler = mapHandler;
         this.layerJListPanel = new LayerJListPanel("Layers to select from");
-        this.sumCharackteristicsHandler = new SumCharacteristicsHandler(
+        this.summarizeHandler = new SummarizeHandler(
                 this.layerJListPanel, this, this.mapHandler);
-
 
         // add menu bar
         JMenuBar menubar = new JMenuBar();
@@ -59,35 +80,60 @@ public class SumCharacteristicsWindow extends JFrame {
         // JPanel for choosing operation
         JPanel chooseJPanel = initChooseJPanel(new JPanel());
 
-        // Lay out the buttons from left to right.
+        // JPanel for buttons
         JPanel buttonPane = new JPanel();
+
+        // Lay out the buttons from left to right.
+        this.jTable = new JTable();
+        JPanel tablePane = initPanel(jTable);
 
         // add layer from file
         createButtonAndAddToButtonPane("Add layer from file",
-                new AddLayerFromFileListener(this.sumCharackteristicsHandler),
+                new AddLayerFromFileListener(this.summarizeHandler),
                 buttonPane);
 
         // add layers that are selected in map
         createButtonAndAddToButtonPane("Add selected layers from map",
                 new AddSelectedLayersFromMapListener(
-                        this.sumCharackteristicsHandler), buttonPane);
+                        this.summarizeHandler), buttonPane);
 
         // remove selected layer
         createButtonAndAddToButtonPane("Remove selected",
-                new RemoveSelectedListener(this.sumCharackteristicsHandler),
+                new RemoveSelectedListener(this.summarizeHandler),
                 buttonPane);
 
         // sum characteristics
         createButtonAndAddToButtonPane(
                 "Calculate",
-                new SumCharacteristicsListener(this.sumCharackteristicsHandler),
+                new SumCharacteristicsListener(this.summarizeHandler),
                 buttonPane);
 
-        // Put everything together, using the content pane's BorderLayout.
+        // Put everything together, using the content pane's
         Container contentPane = getContentPane();
-        contentPane.add(layerJListPanel, BorderLayout.CENTER);
-        contentPane.add(chooseJPanel, BorderLayout.BEFORE_FIRST_LINE);
-        contentPane.add(buttonPane, BorderLayout.PAGE_END);
+        
+        contentPane.setLayout(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.FIRST_LINE_START;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.7;
+        
+        contentPane.add(chooseJPanel, gbc);
+        
+        gbc.weighty = 0.1;
+        gbc.gridy = 1;
+        contentPane.add(layerJListPanel, gbc);
+        
+        gbc.weighty = 0.1;
+        gbc.gridy = 2;
+        contentPane.add(buttonPane, gbc);
+        
+        gbc.weighty = 0.1;
+        gbc.gridy = 3;
+        contentPane.add(tablePane, gbc);
 
         pack();
 
@@ -117,18 +163,19 @@ public class SumCharacteristicsWindow extends JFrame {
 
         // Group the radio buttons.
         ButtonGroup group = new ButtonGroup();
-        
+
         createJRadioButtonAndAddItToJPanelAndJRadioGroup("Length", jPanel,
-                group, new SetCommandListener(this.sumCharackteristicsHandler,
+                group, new SetCommandListener(this.summarizeHandler,
                         Command.GET_LENGTH));
         createJRadioButtonAndAddItToJPanelAndJRadioGroup("Area", jPanel, group,
-                new SetCommandListener(this.sumCharackteristicsHandler,
+                new SetCommandListener(this.summarizeHandler,
                         Command.GET_AREA));
-        createJRadioButtonAndAddItToJPanelAndJRadioGroup("Length ratio", jPanel,
-                group, new SetCommandListener(this.sumCharackteristicsHandler,
+        createJRadioButtonAndAddItToJPanelAndJRadioGroup("Length ratio",
+                jPanel, group, new SetCommandListener(
+                        this.summarizeHandler,
                         Command.GET_LENGTH_RATIO));
         createJRadioButtonAndAddItToJPanelAndJRadioGroup("Area ratio", jPanel,
-                group, new SetCommandListener(this.sumCharackteristicsHandler,
+                group, new SetCommandListener(this.summarizeHandler,
                         Command.GET_AREA_RATIO));
 
         return jPanel;
@@ -155,6 +202,43 @@ public class SumCharacteristicsWindow extends JFrame {
 
         JOptionPane.showMessageDialog(this, message);
 
+    }
+
+    private JPanel initPanel(JTable jTable) {
+
+        try {
+
+            JPanel jPanel = new JPanel();
+//
+//            jTable.setPreferredScrollableViewportSize(getPreferredSize());
+            jTable.setFillsViewportHeight(true);
+
+            DefaultTableModel defaultTableModel = new DefaultTableModel();
+            jTable.setModel(defaultTableModel);
+
+            // Create the scroll pane and add the table to it.
+            JScrollPane scrollPane = new JScrollPane(jTable);
+
+            // Add the scroll pane to this panel.
+            jPanel.add(scrollPane);
+
+            return jPanel;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // TODO uzbaigti
+    private int setTableModel(List<String> columnNames, List<List<Object>> data) {
+
+        // // TableMod
+        // this.jTable.setModel(dataModel);
+
+        return 0;
     }
 
 }

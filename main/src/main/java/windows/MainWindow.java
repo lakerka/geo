@@ -41,7 +41,7 @@ public class MainWindow {
     public SelectHandler selectHandler;
     public ZoomToSelectHandler zoomToSelectHandler;
     public FeatureTableWindow featureTableWindow;
-    public SumCharacteristicsWindow sumCharacteristicsWindow;
+    public SummarizeWindow sumCharacteristicsWindow;
     private GroupFeaturesWindow groupFeaturesWindow;
 
     public MainWindow(SimpleFeatureSource featureSource, int windowLength,
@@ -91,7 +91,7 @@ public class MainWindow {
         this.featureTableWindow = new FeatureTableWindow(this.selectHandler,
                 this.mapHandler);
 
-        this.sumCharacteristicsWindow = new SumCharacteristicsWindow(
+        this.sumCharacteristicsWindow = new SummarizeWindow(
                 this.mapHandler);
 
         this.groupFeaturesWindow = new GroupFeaturesWindow(this.mapHandler);

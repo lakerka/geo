@@ -14,20 +14,20 @@ import org.opengis.feature.simple.SimpleFeature;
 import com.vividsolutions.jts.geom.Geometry;
 
 import windows.Command;
-import windows.SumCharacteristicsWindow;
+import windows.SummarizeWindow;
 import windows.intersect.LayerJListPanel;
 
-public class SumCharacteristicsHandler implements ICommonOperations {
+//TODO uzbaigti
+public class SummarizeHandler implements ICommonOperations {
 
     private LayerJListPanel layerJListPanel;
-    private SumCharacteristicsWindow sumCharacteristicsWindow;
+    private SummarizeWindow sumCharacteristicsWindow;
     private MapHandler mapHandler;
     public Command command = null;
     private final int divisionPrecision = 6;
 
-    public SumCharacteristicsHandler(LayerJListPanel layerJListPanel,
-            SumCharacteristicsWindow sumCharacteristicsWindow,
-            MapHandler mapHandler) {
+    public SummarizeHandler(LayerJListPanel layerJListPanel,
+            SummarizeWindow sumCharacteristicsWindow, MapHandler mapHandler) {
 
         super();
 
@@ -168,23 +168,10 @@ public class SumCharacteristicsHandler implements ICommonOperations {
 
                 while (iterator.hasNext()) {
 
-                    SimpleFeature feature = iterator.next();
-                    double value = 0;
+                    SimpleFeature simpleFeature = iterator.next();
+                    BigDecimal value = getProperty(simpleFeature, command);
 
-                    switch (command) {
-
-                    case GET_AREA:
-                        value = ((Geometry) feature.getDefaultGeometry())
-                                .getArea();
-                        break;
-
-                    case GET_LENGTH:
-                        value = ((Geometry) feature.getDefaultGeometry())
-                                .getLength();
-                        break;
-                    }
-
-                    sumValue = sumValue.add(BigDecimal.valueOf(value));
+                    sumValue = sumValue.add(value);
 
                 }
 
@@ -201,6 +188,40 @@ public class SumCharacteristicsHandler implements ICommonOperations {
         return null;
     }
 
+    private BigDecimal getProperty(SimpleFeature simpleFeature, Command command) {
+
+        try {
+
+            BigDecimal value = null;
+
+            switch (command) {
+
+            case GET_AREA:
+                value = new BigDecimal(
+                        ((Geometry) simpleFeature.getDefaultGeometry())
+                                .getArea());
+                break;
+
+            case GET_LENGTH:
+                value = new BigDecimal(
+                        ((Geometry) simpleFeature.getDefaultGeometry())
+                                .getLength());
+                break;
+
+            default:
+                break;
+            }
+
+            return value;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //sum property for each layer and return list of each layer's property sum
     private List<BigDecimal> getLayerPropertySumList(List<Layer> layerList,
             Command command) {
 
@@ -233,15 +254,24 @@ public class SumCharacteristicsHandler implements ICommonOperations {
 
             String commandString = commandToString(command);
 
+            List<String> columnNames = new ArrayList<String>();
+
+            for (Layer layer : layerList) {
+
+                columnNames.add(Support.getLayerName(layer));
+            }
+
+            List<List<String>> data = new ArrayList<List<String>>();
             for (int i = 0; i < bigDecimalList.size(); i++) {
 
+                data.set(i, new ArrayList<String>());
+
                 String value = bigDecimalList.get(i).toPlainString();
-                String layerName = Support.getLayerName(layerList.get(i));
 
-                this.sumCharacteristicsWindow.displayPopUpBox(layerName + " "
-                        + commandString + " " + value);
-
+                data.get(i).add(value);
             }
+            
+//            this.
 
         } catch (Exception e) {
 
@@ -350,8 +380,7 @@ public class SumCharacteristicsHandler implements ICommonOperations {
 
     public int addSelectedLayersToMap() {
 
-        throw new UnsupportedOperationException(
-                "Method not implemented!");
+        throw new UnsupportedOperationException("Method not implemented!");
 
     }
 }
