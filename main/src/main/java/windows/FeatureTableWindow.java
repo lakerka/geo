@@ -49,8 +49,8 @@ public class FeatureTableWindow extends JFrame {
     private SelectHandler selectHandler;
     private MapHandler mapHandler;
 
-    private List<DataStore> dataStoreList;
-    private DataStore selectedDataStore;
+    private List<Layer> layerList;
+    private Layer selectedLayer;
     private JComboBox<String> featureTypeComboBox;
     private JTable table;
     private JTextField text;
@@ -60,7 +60,7 @@ public class FeatureTableWindow extends JFrame {
     public FeatureTableWindow(SelectHandler selectHandler, MapHandler mapHandler) {
 
         this.setTitle("Feature table");
-        
+
         if (selectHandler == null) {
             throw new IllegalArgumentException(
                     "selectHandler must not be null!");
@@ -69,7 +69,7 @@ public class FeatureTableWindow extends JFrame {
         this.selectHandler = selectHandler;
         this.mapHandler = mapHandler;
 
-        this.dataStoreList = new ArrayList<DataStore>();
+        this.layerList = new ArrayList<Layer>();
 
         getContentPane().setLayout(new BorderLayout());
 
@@ -147,12 +147,12 @@ public class FeatureTableWindow extends JFrame {
         return 1;
     }
 
-    public int clearDataStoresAndSelectedDataStore() {
+    public int clearLayerListAndSelectedLayer() {
 
         try {
 
-            this.dataStoreList.clear();
-            this.selectedDataStore = null;
+            this.layerList.clear();
+            this.selectedLayer = null;
 
         } catch (NullPointerException e) {
 
@@ -163,7 +163,8 @@ public class FeatureTableWindow extends JFrame {
 
     public void addLayersThatAreInMap() {
 
-        List<Layer> mapLayers = this.mapHandler.getLayers();
+        clearLayerListAndSelectedLayer();
+        List<Layer> mapLayers = this.mapHandler.getSelectedOrVisibleLayer(true, false);
 
         for (Layer layer : mapLayers) {
 
@@ -176,12 +177,14 @@ public class FeatureTableWindow extends JFrame {
 
         try {
 
-            DataStore dataStore = this.featureTableHandler
-                    .loadShapeFileDataStore();
+            SimpleFeatureSource simpleFeatureSource = Support.loadShapeFile();
 
-            if (dataStore != null) {
+            if (simpleFeatureSource != null) {
 
-                this.dataStoreList.add(dataStore);
+                Layer layer = Support
+                        .simpleFeatureSourceToLayer(simpleFeatureSource);
+
+                this.layerList.add(layer);
                 updateUI();
             }
 
@@ -196,11 +199,9 @@ public class FeatureTableWindow extends JFrame {
 
         try {
 
-            DataStore dataStore = Support.layerToDataStore(layer);
+            if (layer != null) {
 
-            if (dataStore != null) {
-
-                this.dataStoreList.add(dataStore);
+                this.layerList.add(layer);
                 updateUI();
             }
 
@@ -223,31 +224,11 @@ public class FeatureTableWindow extends JFrame {
             Vector<String> layerNames = new Vector<String>();
 
             // getting type names of shapefiles we have loaded
-            for (DataStore dataStore : this.dataStoreList) {
+            for (Layer layer : this.layerList) {
 
-                String[] typeNamesArray = dataStore.getTypeNames();
+                String layerName = Support.getLayerName(layer);
 
-                if (typeNamesArray.length > 0) {
-
-                    String layerTypeName = typeNamesArray[0];
-
-                    SimpleFeatureSource simpleFeatureSource = dataStore
-                            .getFeatureSource(layerTypeName);
-
-                    Layer layer = Support
-                            .simpleFeatureSourceToLayer(simpleFeatureSource);
-                    
-                    //try to use layer title if possible
-                    if (layer.getTitle() != null && !layer.getTitle().isEmpty()) {
-
-                        layerNames.add(layer.getTitle());
-
-                    } else {
-
-                        layerNames.add(layerTypeName);
-
-                    }
-                }
+                layerNames.add(layerName);
 
             }
 
@@ -270,19 +251,20 @@ public class FeatureTableWindow extends JFrame {
         try {
 
             if (featureTypeComboBox.getSelectedItem() == null
-                    || this.dataStoreList.isEmpty()) {
+                    || this.layerList.isEmpty()) {
                 return 0;
             }
 
-            String typeName = (String) featureTypeComboBox.getSelectedItem();
+            String layerName = (String) featureTypeComboBox.getSelectedItem();
 
-            SimpleFeatureSource source = getFirstDataStoreByTypeName(
-                    this.dataStoreList, typeName).getFeatureSource(typeName);
+            Layer layer = getFirstLayerByLayerName(this.layerList, layerName);
 
+            SimpleFeatureSource source = Support
+                    .layerToSimpleFeatureSource(layer);
             String cqlPredicate = this.text.getText();
 
             FeatureCollectionTableModelExtended model = this.featureTableHandler
-                    .filterFeatures(typeName, source, cqlPredicate);
+                    .filterFeatures(layerName, source, cqlPredicate);
 
             setTableModel(model);
 
@@ -296,23 +278,23 @@ public class FeatureTableWindow extends JFrame {
         return 0;
     }
 
-    private DataStore getFirstDataStoreByTypeName(
-            List<DataStore> dataStoreList, String typeName) {
+    private Layer getFirstLayerByLayerName(List<Layer> layerList,
+            String layerName) {
 
-        if (dataStoreList == null) {
+        if (layerList == null) {
             throw new IllegalArgumentException(
                     "shapefileDataStoreList must not be null!");
         }
 
         try {
 
-            for (DataStore dataStore : dataStoreList) {
+            for (Layer layer : layerList) {
 
-                String[] typeNames = dataStore.getTypeNames();
+                String curLayerName = Support.getLayerName(layer);
 
-                if (typeNames.length > 0 && typeNames[0].equals(typeName)) {
+                if (curLayerName == layerName) {
 
-                    return dataStore;
+                    return layer;
                 }
             }
         } catch (Exception exception) {
@@ -346,19 +328,18 @@ public class FeatureTableWindow extends JFrame {
             List<SimpleFeature> selectedFeatures = new ArrayList<SimpleFeature>();
             selectedFeatures.addAll(this.selectHandler.getSelectedFeatures());
 
-
             FeatureCollectionTableModelExtended tableModel = new FeatureCollectionTableModelExtended(
                     DataUtilities.collection(selectedFeatures));
 
             setTableModel(tableModel);
-            
+
             return 1;
 
         } catch (Exception exception) {
-            
+
             exception.printStackTrace();
         }
-        
+
         return 0;
     }
 
@@ -405,8 +386,8 @@ public class FeatureTableWindow extends JFrame {
         return this.selectHandler.selectByFeatures(simpleFeaturesList);
     }
 
-    public DataStore getSelectedDataStore() {
-        return this.selectedDataStore;
+    public Layer getSelectedLayer() {
+        return this.selectedLayer;
     }
 
     public String getNewLayerName() {
@@ -415,7 +396,7 @@ public class FeatureTableWindow extends JFrame {
         return layerName;
 
     }
-    
+
     public void displayPopUpBox(String message) {
 
         JOptionPane.showMessageDialog(this, message);

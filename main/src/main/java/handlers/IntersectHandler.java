@@ -9,6 +9,8 @@ import org.geotools.main.Main;
 import org.geotools.main.Support;
 import org.geotools.map.Layer;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import setsRelated.GeometrySet;
 import windows.FeatureTableWindow;
 import windows.intersect.IntersectWindow;
@@ -96,7 +98,6 @@ public class IntersectHandler implements ICommonOperations {
                         threadCount);
 
             }
-
             return interSectLayer;
 
         } catch (Exception exception) {

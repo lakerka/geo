@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import listeners.common.AddLayerFromFileListener;
 import listeners.common.AddSelectedLayersFromMapListener;
@@ -47,6 +48,7 @@ import listeners.sumCharackteristics.SetCommandListener;
 import listeners.sumCharackteristics.SumCharacteristicsListener;
 
 import org.geotools.data.DataStore;
+import org.geotools.main.Main;
 import org.geotools.main.Roles;
 import org.geotools.map.Layer;
 
@@ -70,8 +72,8 @@ public class SummarizeWindow extends JFrame {
 
         this.mapHandler = mapHandler;
         this.layerJListPanel = new LayerJListPanel("Layers to select from");
-        this.summarizeHandler = new SummarizeHandler(
-                this.layerJListPanel, this, this.mapHandler);
+        this.summarizeHandler = new SummarizeHandler(this.layerJListPanel,
+                this, this.mapHandler);
 
         // add menu bar
         JMenuBar menubar = new JMenuBar();
@@ -85,32 +87,30 @@ public class SummarizeWindow extends JFrame {
 
         // Lay out the buttons from left to right.
         this.jTable = new JTable();
+        jTable.setSize(800, 300);
         JPanel tablePane = initPanel(jTable);
 
         // add layer from file
         createButtonAndAddToButtonPane("Add layer from file",
-                new AddLayerFromFileListener(this.summarizeHandler),
-                buttonPane);
+                new AddLayerFromFileListener(this.summarizeHandler), buttonPane);
 
         // add layers that are selected in map
         createButtonAndAddToButtonPane("Add selected layers from map",
-                new AddSelectedLayersFromMapListener(
-                        this.summarizeHandler), buttonPane);
+                new AddSelectedLayersFromMapListener(this.summarizeHandler),
+                buttonPane);
 
         // remove selected layer
         createButtonAndAddToButtonPane("Remove selected",
-                new RemoveSelectedListener(this.summarizeHandler),
-                buttonPane);
+                new RemoveSelectedListener(this.summarizeHandler), buttonPane);
 
         // sum characteristics
-        createButtonAndAddToButtonPane(
-                "Calculate",
+        createButtonAndAddToButtonPane("Calculate",
                 new SumCharacteristicsListener(this.summarizeHandler),
                 buttonPane);
 
         // Put everything together, using the content pane's
         Container contentPane = getContentPane();
-        
+
         contentPane.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -120,17 +120,17 @@ public class SummarizeWindow extends JFrame {
         gbc.gridy = 0;
         gbc.weightx = 1.0;
         gbc.weighty = 0.7;
-        
+
         contentPane.add(chooseJPanel, gbc);
-        
+
         gbc.weighty = 0.1;
         gbc.gridy = 1;
         contentPane.add(layerJListPanel, gbc);
-        
+
         gbc.weighty = 0.1;
         gbc.gridy = 2;
         contentPane.add(buttonPane, gbc);
-        
+
         gbc.weighty = 0.1;
         gbc.gridy = 3;
         contentPane.add(tablePane, gbc);
@@ -168,11 +168,9 @@ public class SummarizeWindow extends JFrame {
                 group, new SetCommandListener(this.summarizeHandler,
                         Command.GET_LENGTH));
         createJRadioButtonAndAddItToJPanelAndJRadioGroup("Area", jPanel, group,
-                new SetCommandListener(this.summarizeHandler,
-                        Command.GET_AREA));
+                new SetCommandListener(this.summarizeHandler, Command.GET_AREA));
         createJRadioButtonAndAddItToJPanelAndJRadioGroup("Length ratio",
-                jPanel, group, new SetCommandListener(
-                        this.summarizeHandler,
+                jPanel, group, new SetCommandListener(this.summarizeHandler,
                         Command.GET_LENGTH_RATIO));
         createJRadioButtonAndAddItToJPanelAndJRadioGroup("Area ratio", jPanel,
                 group, new SetCommandListener(this.summarizeHandler,
@@ -209,12 +207,14 @@ public class SummarizeWindow extends JFrame {
         try {
 
             JPanel jPanel = new JPanel();
-//
-//            jTable.setPreferredScrollableViewportSize(getPreferredSize());
+            //
+            // jTable.setPreferredScrollableViewportSize(getPreferredSize());
             jTable.setFillsViewportHeight(true);
 
             DefaultTableModel defaultTableModel = new DefaultTableModel();
             jTable.setModel(defaultTableModel);
+            jTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            jTable.setPreferredScrollableViewportSize(new Dimension(500, 200));
 
             // Create the scroll pane and add the table to it.
             JScrollPane scrollPane = new JScrollPane(jTable);
@@ -233,12 +233,47 @@ public class SummarizeWindow extends JFrame {
     }
 
     // TODO uzbaigti
-    private int setTableModel(List<String> columnNames, List<List<Object>> data) {
+    public int setTableModel(List<String> columnNames,
+            List<List<Object>> dataList) {
+
+        if (columnNames == null || dataList == null) {
+            throw new IllegalArgumentException("arguments must not be null");
+        }
 
         // // TableMod
         // this.jTable.setModel(dataModel);
+        // this.jTable.setModel(dataModel);
+
+        try {
+
+            Object[][] dataArray = new Object[dataList.size()][];
+            for (int i = 0; i < dataArray.length; i++) {
+                dataArray[i] = dataList.get(i).toArray();
+            }
+            
+            TableModel tableModel = new DefaultTableModel(dataArray,
+                    columnNames.toArray());
+            
+            this.jTable.setModel(tableModel);
+            this.jTable.repaint();
+            
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
 
         return 0;
     }
 
+    public int displayYesNoWindow(String question) {
+        
+        int dialogResult = JOptionPane.showConfirmDialog (null, question,"Warning",JOptionPane.YES_NO_OPTION);
+        if(dialogResult == JOptionPane.YES_OPTION) {
+            return 1;
+        }else {
+            return 0;
+        }
+            
+    }
+    
 }

@@ -10,8 +10,7 @@ public class DisplayIntersectWindowButtonListener implements ActionListener {
 
     private IntersectWindow intersectWindow;
 
-    public DisplayIntersectWindowButtonListener(
-            IntersectWindow intersectWindow) {
+    public DisplayIntersectWindowButtonListener(IntersectWindow intersectWindow) {
 
         super();
 
@@ -26,12 +25,8 @@ public class DisplayIntersectWindowButtonListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         try {
-            
-            if (intersectWindow.isVisible()) {
-                intersectWindow.setVisible(false);
-            } else {
-                intersectWindow.setVisible(true);
-            }
+
+            intersectWindow.setVisible(true);
 
         } catch (Exception e1) {
 

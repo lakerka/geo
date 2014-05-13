@@ -26,11 +26,7 @@ public class DisplayAttributeTableButtonListener implements ActionListener {
 
         try {
             
-            if (featureTableWindow.isVisible()) {
-                featureTableWindow.setVisible(false);
-            } else {
                 featureTableWindow.setVisible(true);
-            }
 
         } catch (Exception e1) {
 

@@ -29,6 +29,11 @@ public class AddLayerButtonListener extends JFrame implements ActionListener {
     public void addLayer() {
 
         SimpleFeatureSource simpleFeatureSource = Support.loadShapeFile();
+        
+        if (simpleFeatureSource == null) {
+            return;
+        }
+        
         Main.mainWindow.addLayer(simpleFeatureSource);
     }
        
