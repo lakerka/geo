@@ -4,8 +4,10 @@ import interfaces.ICommonOperations;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
@@ -16,6 +18,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 
 import windows.Command;
 import windows.SummarizeWindow;
@@ -32,6 +35,10 @@ public class SummarizeHandler implements ICommonOperations {
 
     private List<String> columnNames;
     private List<List<Object>> cells;
+
+    public SummarizeHandler() {
+        super();
+    }
 
     public SummarizeHandler(LayerJListPanel layerJListPanel,
             SummarizeWindow sumCharacteristicsWindow, MapHandler mapHandler) {
@@ -107,20 +114,22 @@ public class SummarizeHandler implements ICommonOperations {
 
                 Layer layer1 = layerList.get(0);
                 Layer layer2 = layerList.get(1);
-                
+
                 String layer1Name = Support.getLayerName(layer1);
                 String layer2Name = Support.getLayerName(layer2);
-                
-                int layer1ByLayer2 = sumCharacteristicsWindow.displayYesNoWindow(layer1Name+"/"+layer2Name + " ratio?");
 
-                //swap if the case
+                int layer1ByLayer2 = sumCharacteristicsWindow
+                        .displayYesNoWindow(layer1Name + "/" + layer2Name
+                                + " ratio?");
+
+                // swap if the case
                 if (layer1ByLayer2 != 1) {
-                    
+
                     Layer tmpLayer = layer2;
                     layer2 = layer1;
                     layer1 = tmpLayer;
                 }
-                
+
                 List<String> commandsList = new ArrayList<String>();
                 commandsList.add(commandToString(command));
 
@@ -204,21 +213,64 @@ public class SummarizeHandler implements ICommonOperations {
         return 1;
     }
 
-    private BigDecimal sumProperty(Layer layer, Command command) {
+    public BigDecimal sumProperty(Layer layer, Command command) {
+
+        if (layer == null || command == null) {
+            throw new IllegalArgumentException("Arguments must not be null!");
+        }
 
         try {
 
-            SimpleFeatureIterator iterator = ((SimpleFeatureCollection) layer
-                    .getFeatureSource().getFeatures()).features();
+            List<SimpleFeature> simpleFeatureList = Support
+                    .layerToSimpleFeatureList(layer);
+
+            return sumProperty(simpleFeatureList, command);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public BigDecimal sumProperty(List<SimpleFeature> simpleFeatureList,
+            Command command) {
+
+        if (simpleFeatureList == null || command == null) {
+            throw new IllegalArgumentException("Arguments must not be null!");
+        }
+
+        try {
+
+            SimpleFeatureIterator iterator = DataUtilities.collection(
+                    simpleFeatureList).features();
 
             BigDecimal sumValue = new BigDecimal(0);
+
+            Command getPropertyCommand;
+
+            switch (command) {
+
+            case GET_LENGTH_SUM:
+                getPropertyCommand = Command.GET_LENGTH;
+                break;
+
+            case GET_AREA_SUM:
+                getPropertyCommand = Command.GET_AREA;
+                break;
+
+            default:
+                return null;
+            }
 
             try {
 
                 while (iterator.hasNext()) {
 
                     SimpleFeature simpleFeature = iterator.next();
-                    BigDecimal value = getProperty(simpleFeature, command);
+                    BigDecimal value = getProperty(simpleFeature,
+                            getPropertyCommand);
 
                     sumValue = sumValue.add(value);
 
@@ -255,6 +307,35 @@ public class SummarizeHandler implements ICommonOperations {
                 value = new BigDecimal(
                         ((Geometry) simpleFeature.getDefaultGeometry())
                                 .getLength());
+                break;
+
+            default:
+                break;
+            }
+
+            return value;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private BigDecimal getProperty(Geometry geometry, Command command) {
+
+        try {
+
+            BigDecimal value = null;
+
+            switch (command) {
+
+            case GET_AREA:
+                value = new BigDecimal(geometry.getArea());
+                break;
+
+            case GET_LENGTH:
+                value = new BigDecimal(geometry.getLength());
                 break;
 
             default:
@@ -427,7 +508,8 @@ public class SummarizeHandler implements ICommonOperations {
             }
 
             // display
-            return sumCharacteristicsWindow.setTableModel(columnNames, data);
+            return sumCharacteristicsWindow.setTableModelAndRepaint(
+                    columnNames, data);
 
         } catch (Exception e) {
 
@@ -652,6 +734,49 @@ public class SummarizeHandler implements ICommonOperations {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public BigDecimal sumProperty(Collection<Geometry> geometryCollection, Command command) {
+
+        if (geometryCollection == null || command == null) {
+            throw new IllegalArgumentException("Arguments must not be null!");
+        }
+
+        try {
+
+            BigDecimal sumValue = new BigDecimal(0);
+
+            Command getPropertyCommand;
+
+            switch (command) {
+
+            case GET_LENGTH_SUM:
+                getPropertyCommand = Command.GET_LENGTH;
+                break;
+
+            case GET_AREA_SUM:
+                getPropertyCommand = Command.GET_AREA;
+                break;
+
+            default:
+                return null;
+            }
+
+            for (Geometry geometry : geometryCollection) {
+
+                BigDecimal value = getProperty(geometry, getPropertyCommand);
+
+                sumValue = sumValue.add(value);
+
+            }
+
+            return sumValue;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
         return null;
     }
 }

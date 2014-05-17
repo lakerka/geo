@@ -62,7 +62,7 @@ public class SummarizeWindow extends JFrame {
     private static final long serialVersionUID = -6803473575112496352L;
 
     private MapHandler mapHandler;
-    private SummarizeHandler summarizeHandler;
+    public SummarizeHandler summarizeHandler;
     private LayerJListPanel layerJListPanel;
     private JTable jTable;
 
@@ -213,7 +213,7 @@ public class SummarizeWindow extends JFrame {
 
             DefaultTableModel defaultTableModel = new DefaultTableModel();
             jTable.setModel(defaultTableModel);
-            jTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//            jTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             jTable.setPreferredScrollableViewportSize(new Dimension(500, 200));
 
             // Create the scroll pane and add the table to it.
@@ -231,18 +231,14 @@ public class SummarizeWindow extends JFrame {
 
         return null;
     }
-
-    // TODO uzbaigti
-    public int setTableModel(List<String> columnNames,
+    
+    public int setTableModelAndRepaint(List<String> columnNames,
             List<List<Object>> dataList) {
 
         if (columnNames == null || dataList == null) {
             throw new IllegalArgumentException("arguments must not be null");
         }
 
-        // // TableMod
-        // this.jTable.setModel(dataModel);
-        // this.jTable.setModel(dataModel);
 
         try {
 

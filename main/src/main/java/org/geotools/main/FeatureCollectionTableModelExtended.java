@@ -62,5 +62,9 @@ public  class FeatureCollectionTableModelExtended extends FeatureCollectionTable
         }
 
     }
+    
+    public List<SimpleFeature>  getSimpleFeatureList() {
+        return this.simpleFeatureList;
+    }
 
 }

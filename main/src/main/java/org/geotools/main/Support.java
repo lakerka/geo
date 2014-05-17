@@ -10,9 +10,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.Attributes.Name;
+
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
@@ -59,6 +63,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.util.GeometryCombiner;
 
 public class Support {
 
@@ -89,6 +94,26 @@ public class Support {
 
             File file = new File(filePath);
             return loadShapeFile(file);
+
+        } catch (Exception exception) {
+
+            if (!(exception instanceof IOException)
+                    && !(exception instanceof NullPointerException)) {
+
+                exception.printStackTrace();
+
+            }
+
+            return null;
+        }
+    }
+
+    public static Layer loadLayer(String filePath) {
+
+        try {
+
+            File file = new File(filePath);
+            return Support.simpleFeatureSourceToLayer(loadShapeFile(file));
 
         } catch (Exception exception) {
 
@@ -589,7 +614,7 @@ public class Support {
 
             Layer layer = Support
                     .simpleFeatureSourceToLayer(simpleFeatureSource);
-            
+
             return layer;
 
         } catch (Exception exception) {
@@ -671,76 +696,73 @@ public class Support {
         return false;
     }
 
-    // public static List<Geometry> getGeometriesList(Geometry geometry) {
-    //
-    // if (geometry == null) {
-    // throw new IllegalArgumentException("geometry must not be null!");
-    // }
-    //
-    // try {
-    //
-    // List<Geometry> geometryList = new ArrayList<Geometry>();
-    //
-    // for (int i = 0; i < geometry.getNumGeometries(); i++) {
-    //
-    // Geometry currentGeoemGeometry = geometry.getGeometryN(i);
-    //
-    // geometryList.add(currentGeoemGeometry);
-    // }
-    //
-    // return geometryList;
-    //
-    // } catch (Exception e) {
-    //
-    // e.printStackTrace();
-    // }
-    //
-    // return null;
-    // }
-
-    // TODO test if works
-    // public static GeometryCollection getGeometriesCollection(Geometry
-    // geometry) {
-    //
-    // if (geometry == null) {
-    // throw new IllegalArgumentException("geometry must not be null!");
-    // }
-    //
-    // try {
-    //
-    // List<Geometry> geomCollection = Support.getGeometriesList(geometry);
-    //
-    // GeometryFactory geometryFactory = new GeometryFactory();
-    //
-    // GeometryCollection geometryCollection = new GeometryCollection(
-    // GeometryFactory.toGeometryArray(geomCollection),
-    // geometryFactory);
-    //
-    // return geometryCollection;
-    //
-    // } catch (Exception e) {
-    //
-    // e.printStackTrace();
-    // }
-    //
-    // return null;
-    // }
-
+    // validate and combine geometries
     public static Geometry combineIntoOneGeometry(
             Collection<Geometry> collectionGeometry) {
 
         try {
 
+            collectionGeometry = validateGeometryCollection(collectionGeometry);
+            // List<SimpleFeature> combinedGeometryList =
+            // Support.recursiveCombine(collectionGeometry);
+            // collectionGeometry =
+
+            // old code
             GeometryFactory factory = new GeometryFactory();
 
-            // note the following geometry collection may be invalid (say with
+            // note the following geometry collection may be invalid (say
+            // with
             // overlapping polygons)
             GeometryCollection geometryCollection = (GeometryCollection) factory
                     .buildGeometry(collectionGeometry);
 
-            Geometry union = geometryCollection.union();
+            Geometry combinedGeometry = geometryCollection.union();
 
-            return union;
+            // new code
+            // Geometry combinedGeometry = null;
+            //
+            // for (Iterator<Geometry> iterator = collectionGeometry.iterator();
+            // iterator
+            // .hasNext();) {
+            //
+            // Geometry geometry = iterator.next();
+            //
+            // if (geometry == null) {
+            // continue;
+            // }
+            //
+            // if (combinedGeometry == null) {
+            //
+            // combinedGeometry = (Geometry) geometry.clone();
+            //
+            // } else {
+            //
+            // Geometry tmpCombinedGeometry = GeometryCombiner.combine(
+            // combinedGeometry, geometry);
+            //
+            //
+            // if (tmpCombinedGeometry.isValid()) {
+            //
+            // combinedGeometry = tmpCombinedGeometry;
+            //
+            // }
+            // }
+            // }
+
+            // // new code 2
+            // GeometryCombiner g = new GeometryCombiner(collectionGeometry);
+            // Geometry combinedGeometry = g.combine();
+
+            // new code 3
+            // GeometryFactory factory = new GeometryFactory();
+            //
+            // GeometryCollection geometryCollection = (GeometryCollection)
+            // factory
+            // .buildGeometry(collectionGeometry);
+            //
+            // Geometry combinedgeometry = geometryCollection.buffer(0);
+
+            return combinedGeometry;
 
         } catch (Exception e) {
 
@@ -748,6 +770,104 @@ public class Support {
         }
 
         return null;
+    }
+
+    // validates and filters list of geometries
+    public static List<Geometry> validateGeometryList(
+            List<Geometry> geometryList) {
+
+        if (geometryList == null) {
+            throw new IllegalArgumentException("Arguments must not be null!");
+        }
+
+        try {
+
+            Collection<Geometry> collectionGeometry = new ArrayList<Geometry>(
+                    geometryList);
+
+            Collection<Geometry> validCollectionGeometry = Support
+                    .validateGeometryCollection(collectionGeometry);
+
+            List<Geometry> validGeometryList = new ArrayList<Geometry>(
+                    validCollectionGeometry);
+
+            return validGeometryList;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // validates and filters collection of geometries
+    public static Collection<Geometry> validateGeometryCollection(
+            Collection<Geometry> collectionGeometry) {
+
+        if (collectionGeometry == null) {
+            throw new IllegalArgumentException("Arguments must not be null!");
+        }
+
+        try {
+
+            List<Geometry> geometryList = new ArrayList<Geometry>();
+
+            for (Iterator<Geometry> iterator = collectionGeometry.iterator(); iterator
+                    .hasNext();) {
+
+                Geometry geometry = iterator.next();
+
+                geometry = Support.validateGeometry(geometry);
+
+                if (geometry == null) {
+
+                    continue;
+
+                } else {
+
+                    geometryList.add(geometry);
+
+                }
+
+            }
+
+            Collection<Geometry> validCollectionGeometry = new ArrayList<Geometry>(
+                    geometryList);
+
+            return validCollectionGeometry;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // validates geometry, return null on invalid geometry
+    public static Geometry validateGeometry(Geometry geometry) {
+
+        try {
+
+            if (!geometry.isValid()) {
+
+                geometry.buffer(0);
+
+                // ignore invalid geometries
+                if (!geometry.isValid()) {
+                    return null;
+                }
+
+            }
+
+            return geometry;
+
+        } catch (Exception e) {
+
+            return null;
+        }
+
     }
 
     public static SimpleFeatureCollection addAreaColumn(
@@ -823,4 +943,46 @@ public class Support {
         return null;
     }
 
+    public static int setAttributeValue(SimpleFeature simpeFeature,
+            String attributeName, Object attributeValue) {
+
+        if (simpeFeature == null || attributeName == null) {
+            throw new IllegalArgumentException("arguments must not be null!");
+        }
+
+        try {
+
+            simpeFeature.setAttribute(attributeName, attributeValue);
+
+            return 1;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public static Object[][] listOfListToArrayOfArray(List<List<Object>> data) {
+
+        if (data == null) {
+            throw new IllegalArgumentException("Arguments must not be null");
+        }
+
+        try {
+
+            Object[][] dataArray = new Object[data.size()][];
+            for (int i = 0; i < dataArray.length; i++) {
+                dataArray[i] = data.get(i).toArray();
+            }
+
+            return dataArray;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

@@ -251,12 +251,6 @@ public class GeometrySet {
             // TODO remove printing
             long startTime = System.nanoTime();
 
-            // this function changes global variables!!!
-            // assignFirstAndSecondSimpleFeatureCollections(
-            // simpleFeatureCollection_1, simpleFeatureCollection_2);
-
-            // //TODO
-
             Class geometryType_1 = simpleFeatureCollection_1.getSchema()
                     .getGeometryDescriptor().getType().getBinding();
             Class geometryType_2 = simpleFeatureCollection_2.getSchema()
@@ -333,8 +327,8 @@ public class GeometrySet {
                 }
             }
 
-            int firtPartitionsCount = Math.min(firstSimpleFeatureCollection.size(), 15);
-            int secondPartitionsCount = Math.max(threadCount, 10);
+            int firtPartitionsCount = firstSimpleFeatureCollection.size();
+            int secondPartitionsCount = Math.min(secondSimpleFeatureCollection.size(), 10);
 
             List<SimpleFeatureCollection> simpleFeaturePartition_1 = partition(
                     firstSimpleFeatureCollection, firtPartitionsCount);
@@ -369,6 +363,7 @@ public class GeometrySet {
                             simpleFeaturePartition_2.get(j),
                             intersectSimpleFeatureList, idToStartFrom,
                             inverseSemaphore));
+                    
 
                     idToStartFrom += (simpleFeaturePartition_1.get(i).size()
                             * simpleFeaturePartition_2.get(j).size() + 1);
@@ -386,8 +381,8 @@ public class GeometrySet {
 
             // TODO remove printing
             long endTime = System.nanoTime();
-            System.out.println("Took " + (endTime - startTime) / 60000000000.0
-                    + " min");
+            System.out.println("Took " + (endTime - startTime) / 60000000000.0 * 60.0
+                    + " s");
 
             return DataUtilities.collection(intersectSimpleFeatureList);
 

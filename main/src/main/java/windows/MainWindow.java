@@ -20,6 +20,7 @@ import listeners.mainWindow.AddLayerButtonListener;
 import listeners.mainWindow.DisplayAttributeTableButtonListener;
 import listeners.mainWindow.DisplayGroupFeaturesWindow;
 import listeners.mainWindow.DisplayIntersectWindowButtonListener;
+import listeners.mainWindow.DisplaySecondTask;
 import listeners.mainWindow.DisplaySumCharackteristicsWindowListener;
 import listeners.mainWindow.ExportLayerButtonListener;
 import listeners.mainWindow.SelectButtonListener;
@@ -41,8 +42,10 @@ public class MainWindow {
     public SelectHandler selectHandler;
     public ZoomToSelectHandler zoomToSelectHandler;
     public FeatureTableWindow featureTableWindow;
-    public SummarizeWindow sumCharacteristicsWindow;
-    private GroupFeaturesWindow groupFeaturesWindow;
+    public SummarizeWindow summarizeWindow;
+    public GroupFeaturesWindow groupFeaturesWindow;
+    public SecondTask secondTaskWindow;
+    public IntersectWindow intersectWindow;
 
     public MainWindow(SimpleFeatureSource featureSource, int windowLength,
             int windowHeight) {
@@ -91,10 +94,14 @@ public class MainWindow {
         this.featureTableWindow = new FeatureTableWindow(this.selectHandler,
                 this.mapHandler);
 
-        this.sumCharacteristicsWindow = new SummarizeWindow(
-                this.mapHandler);
+        this.summarizeWindow = new SummarizeWindow(this.mapHandler);
 
         this.groupFeaturesWindow = new GroupFeaturesWindow(this.mapHandler);
+
+        this.intersectWindow = new IntersectWindow(this.selectHandler,
+                this.mapHandler);
+
+        this.secondTaskWindow = new SecondTask();
 
         // add attribute table window button
         addButtonToToolBar(
@@ -104,8 +111,8 @@ public class MainWindow {
 
         // add intersect window button
         addButtonToToolBar(Roles.DisplayIntersectWindow.label,
-                new DisplayIntersectWindowButtonListener(new IntersectWindow(
-                        this.selectHandler, this.mapHandler)), toolbar);
+                new DisplayIntersectWindowButtonListener(this.intersectWindow),
+                toolbar);
 
         // add [export selected and visible] button window button
         addButtonToToolBar("Export", new ExportLayerButtonListener(
@@ -114,13 +121,19 @@ public class MainWindow {
         // add button for displaying sumCharackteristics window
         addButtonToToolBar("Summary",
                 new DisplaySumCharackteristicsWindowListener(
-                        this.sumCharacteristicsWindow), toolbar);
+                        this.summarizeWindow), toolbar);
 
         // add button for displaying group by feature attribute window
         addButtonToToolBar("Group", new DisplayGroupFeaturesWindow(
                 this.groupFeaturesWindow), toolbar);
 
+        // add button for displaying second task window
+        addButtonToToolBar("2nd task", new DisplaySecondTask(
+                this.secondTaskWindow, this.mapHandler, this.selectHandler),
+                toolbar);
+
         this.mapFrame.setVisible(true);
+
     }
 
     private int addButtonToToolBar(String buttonLabel,
