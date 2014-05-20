@@ -1,4 +1,4 @@
-package windows;
+package views.windows;
 
 import handlers.FeatureTableHandler;
 import handlers.MapHandler;

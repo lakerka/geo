@@ -1,4 +1,4 @@
-package windows.intersect;
+package views.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -35,6 +35,8 @@ import handlers.SelectHandler;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.main.Support;
 import org.geotools.map.Layer;
+
+import views.other.LayerListCellRenderer;
 
 public class LayerJListPanel extends JPanel {
 

@@ -12,9 +12,9 @@ import org.geotools.map.Layer;
 import com.vividsolutions.jts.geom.Geometry;
 
 import setsRelated.GeometrySet;
-import windows.FeatureTableWindow;
-import windows.intersect.IntersectWindow;
-import windows.intersect.LayerJListPanel;
+import views.panels.LayerJListPanel;
+import views.windows.FeatureTableWindow;
+import views.windows.intersect.IntersectWindow;
 
 public class IntersectHandler implements ICommonOperations {
 

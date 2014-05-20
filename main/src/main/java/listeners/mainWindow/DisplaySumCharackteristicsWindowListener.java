@@ -3,8 +3,8 @@ package listeners.mainWindow;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import windows.FeatureTableWindow;
-import windows.SummarizeWindow;
+import views.windows.FeatureTableWindow;
+import views.windows.SummarizeWindow;
 
 public class DisplaySumCharackteristicsWindowListener implements ActionListener {
 

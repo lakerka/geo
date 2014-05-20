@@ -20,9 +20,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 
-import windows.Command;
-import windows.SummarizeWindow;
-import windows.intersect.LayerJListPanel;
+import views.panels.LayerJListPanel;
+import views.windows.Command;
+import views.windows.SummarizeWindow;
 
 //TODO uzbaigti
 public class SummarizeHandler implements ICommonOperations {

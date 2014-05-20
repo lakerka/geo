@@ -1,4 +1,4 @@
-package windows.intersect;
+package views.windows.intersect;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -35,7 +35,8 @@ import org.geotools.swing.MapLayerTable;
 import org.geotools.swing.MapLayerTableCellRenderer.LayerControlItem;
 import org.geotools.swing.action.SafeAction;
 
-import windows.FeatureTableWindow;
+import views.panels.LayerJListPanel;
+import views.windows.FeatureTableWindow;
 import handlers.FeatureTableHandler;
 import handlers.IntersectHandler;
 import handlers.MapHandler;

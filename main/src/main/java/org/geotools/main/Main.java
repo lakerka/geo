@@ -7,6 +7,7 @@ import handlers.ExportShapeFileAction;
 
 
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +36,7 @@ import setsRelated.IntersectTest;
 
 import com.vividsolutions.jts.geom.*;
 
-import windows.MainWindow;
+import views.windows.MainWindow;
 
 /*
  * + add/remove layer

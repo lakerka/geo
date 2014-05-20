@@ -29,7 +29,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
 
-import windows.FeatureTableWindow;
+import views.windows.FeatureTableWindow;
 
 public class FeatureTableHandler {
 

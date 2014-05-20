@@ -1,4 +1,4 @@
-package windows;
+package views.windows;
 
 import handlers.MapHandler;
 import handlers.SelectHandler;
@@ -33,7 +33,7 @@ import org.geotools.map.MapContent;
 import org.geotools.swing.JMapFrame;
 import org.geotools.swing.tool.CursorTool;
 
-import windows.intersect.IntersectWindow;
+import views.windows.intersect.IntersectWindow;
 
 public class MainWindow {
 

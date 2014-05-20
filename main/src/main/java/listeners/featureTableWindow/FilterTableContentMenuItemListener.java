@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 
-import windows.FeatureTableWindow;
+import views.windows.FeatureTableWindow;
 
 public class FilterTableContentMenuItemListener implements ActionListener {
 

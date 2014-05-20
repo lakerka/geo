@@ -1,4 +1,4 @@
-package windows.intersect;
+package views.other;
 
 import java.awt.Color;
 import java.awt.Component;

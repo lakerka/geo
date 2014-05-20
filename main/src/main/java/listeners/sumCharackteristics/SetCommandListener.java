@@ -5,8 +5,8 @@ import handlers.SummarizeHandler;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import windows.Command;
-import windows.SummarizeWindow;
+import views.windows.Command;
+import views.windows.SummarizeWindow;
 
 public class SetCommandListener implements ActionListener {
 

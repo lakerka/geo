@@ -3,7 +3,7 @@ package listeners.featureTableWindow;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import windows.FeatureTableWindow;
+import views.windows.FeatureTableWindow;
 
 public class AddLayersFromMapToAttributeTableListener implements ActionListener {
 

@@ -1,4 +1,4 @@
-package windows;
+package views.windows;
 
 import handlers.FeatureTableHandler;
 import handlers.MapHandler;
@@ -52,7 +52,7 @@ import org.geotools.main.Main;
 import org.geotools.main.Roles;
 import org.geotools.map.Layer;
 
-import windows.intersect.LayerJListPanel;
+import views.panels.LayerJListPanel;
 
 public class SummarizeWindow extends JFrame {
 

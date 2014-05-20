@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 
 import org.geotools.map.Layer;
 
-import windows.intersect.IntersectWindow;
+import views.windows.intersect.IntersectWindow;
 
 //used to intersect layers from insertesct window
 public class IntersectButtonListener implements ActionListener {
