@@ -327,7 +327,7 @@ public class GeometrySet {
                 }
             }
 
-            int firtPartitionsCount = firstSimpleFeatureCollection.size();
+            int firtPartitionsCount = Math.min(firstSimpleFeatureCollection.size(), 10);
             int secondPartitionsCount = Math.min(secondSimpleFeatureCollection.size(), 10);
 
             List<SimpleFeatureCollection> simpleFeaturePartition_1 = partition(

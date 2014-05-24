@@ -2,6 +2,7 @@ package views.windows;
 
 import handlers.MapHandler;
 import handlers.SelectHandler;
+import handlers.ThirdTaskHandler;
 import handlers.ZoomToSelectHandler;
 
 import java.awt.Button;
@@ -50,15 +51,17 @@ public class MainWindow {
     public MainWindow(SimpleFeatureSource featureSource, int windowLength,
             int windowHeight) {
 
-        // Create a map context
-        this.mapHandler = new MapHandler(new MapContent());
-
         if (featureSource != null) {
             addLayer(featureSource);
         }
 
         // Create a JMapFrame with custom toolbar buttons
-        this.mapFrame = new JMapFrame(mapHandler.getMapContent());
+        MapContent mapContent = new MapContent();
+        this.mapFrame = new JMapFrame(mapContent);
+        
+        this.mapHandler = new MapHandler(mapContent, mapFrame);
+        
+        this.mapFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.mapFrame.enableToolBar(true);
         this.mapFrame.enableStatusBar(true);
         this.mapFrame.enableLayerTable(true);
@@ -127,12 +130,19 @@ public class MainWindow {
         addButtonToToolBar("Group", new DisplayGroupFeaturesWindow(
                 this.groupFeaturesWindow), toolbar);
 
-        // add button for displaying second task window
-        addButtonToToolBar("2nd task", new DisplaySecondTask(
-                this.secondTaskWindow, this.mapHandler, this.selectHandler),
-                toolbar);
+        // // add button for displaying second task window
+        // addButtonToToolBar("2nd task", new DisplaySecondTask(
+        // this.secondTaskWindow, this.mapHandler, this.selectHandler),
+        // toolbar);
+
+        // for displaying second task window
+        ThirdTaskWindow thirdTaskWindow = new ThirdTaskWindow();
+        ThirdTaskHandler thirdTaskHandler = new ThirdTaskHandler(
+                thirdTaskWindow, this.mapHandler, this.selectHandler);
+        thirdTaskWindow.setThirdTaskHandler(thirdTaskHandler);
 
         this.mapFrame.setVisible(true);
+        thirdTaskWindow.setVisible(true);
 
     }
 

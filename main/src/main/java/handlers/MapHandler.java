@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.main.Validator;
 import org.geotools.main.Support;
 import org.geotools.map.FeatureLayer;
 import org.geotools.map.Layer;
@@ -18,6 +19,7 @@ import org.geotools.map.MapViewport;
 import org.geotools.referencing.CRS;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
+import org.geotools.swing.JMapFrame;
 import org.geotools.swing.MapPane;
 import org.geotools.swing.event.MapMouseEventDispatcher;
 import org.geotools.swing.event.MapMouseListener;
@@ -29,8 +31,18 @@ import org.opengis.geometry.Envelope;
 public class MapHandler implements MapPane {
 
     private MapContent mapContent;
+    private JMapFrame mapFrame;
+
+    public MapHandler(MapContent mapContent, JMapFrame jMapFrame) {
+
+        this(mapContent);
+        Validator.checkNullPointerPassed(jMapFrame);
+        this.mapFrame = jMapFrame;
+    }
 
     public MapHandler(MapContent mapContent) {
+
+        Validator.checkNullPointerPassed(mapContent);
         this.mapContent = mapContent;
     }
 
@@ -103,9 +115,8 @@ public class MapHandler implements MapPane {
 
     public int addLayerToMapContent(Layer layer) {
 
-        if (layer == null || mapContent == null) {
-            throw new IllegalArgumentException("layer must not be null!");
-        }
+        Validator.checkNullPointerPassed(layer);
+        Validator.checkNotInitialized(mapContent);
 
         try {
 
@@ -119,6 +130,69 @@ public class MapHandler implements MapPane {
 
         return 0;
 
+    }
+
+    public int addLayerToMapContent(Layer layer, boolean ignoreRepaint) {
+
+        if (layer == null) {
+            throw new IllegalArgumentException("arguments must not be null!");
+        }
+        if (mapContent == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+        if (mapFrame == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+
+        try {
+
+            return addLayerToMapContent(
+                    (SimpleFeatureSource) layer.getFeatureSource(),
+                    ignoreRepaint);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return 0;
+
+    }
+
+    public int addLayerToMapContent(SimpleFeatureSource simpleFeatureSource,
+            boolean ignoreRepaint) {
+
+        if (simpleFeatureSource == null) {
+            throw new IllegalArgumentException("arguments must not be null!");
+        }
+        if (mapContent == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+        if (mapFrame == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+
+        try {
+
+            Style style = SLD
+                    .createSimpleStyle(simpleFeatureSource.getSchema());
+            FeatureLayer layer = new FeatureLayer(simpleFeatureSource, style);
+            layer.setVisible(ignoreRepaint);
+
+            this.mapFrame.setIgnoreRepaint(ignoreRepaint);
+
+            int result = (this.mapContent.addLayer(layer) ? 1 : 0);
+
+            this.mapFrame.setIgnoreRepaint(!ignoreRepaint);
+
+            return result;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
     public int addLayerToMapContent(SimpleFeatureSource simpleFeatureSource) {
@@ -193,6 +267,25 @@ public class MapHandler implements MapPane {
         }
 
         return null;
+    }
+
+    public int removeAllLayersFromMapContent() {
+
+        try {
+
+            for (Layer layer : this.mapContent.layers()) {
+                this.mapContent.removeLayer(layer);
+            }
+
+            return 1;
+
+        } catch (Exception exception) {
+
+            exception.printStackTrace();
+
+        }
+
+        return 0;
     }
 
     public void addMapPaneListener(MapPaneListener arg0) {

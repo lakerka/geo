@@ -51,7 +51,12 @@ public class SelectHandler {
 
     // all selected features covering rectangle
     // used by zoom
-    private ReferencedEnvelope selectedReferencedEnvelope;
+    //is covering all features that are intersecting
+    // with selected rectangle
+    private ReferencedEnvelope selectedFeaturesReferencedEnvelope;
+    
+    //selected reference envelope covering only by selected rectangle
+    private ReferencedEnvelope selectedRectangleReferencedEnvelope;
 
     private Set<SimpleFeature> selectedFeatures;
 
@@ -59,7 +64,8 @@ public class SelectHandler {
 
         this.mapFrame = mapFrame;
         this.mapHandler = mapHandler;
-        this.selectedReferencedEnvelope = new ReferencedEnvelope();
+        this.selectedFeaturesReferencedEnvelope = new ReferencedEnvelope();
+        this.selectedRectangleReferencedEnvelope = new ReferencedEnvelope();
         this.selectedFeatures = new HashSet<SimpleFeature>();
     }
 
@@ -82,6 +88,7 @@ public class SelectHandler {
                 // clear all previously selected selected features covering
                 // rectangle
                 setToNullSelectedReferencedEnvelope();
+                selectedRectangleReferencedEnvelope.setToNull();
 
                 // clear all previously selected selected features if needed
                 selectedFeatures.clear();
@@ -116,6 +123,8 @@ public class SelectHandler {
 
                     ReferencedEnvelope realWorldBoundingRectangle = rectangleToReferenceEnvelope(selectedRealWorldRectangle);
 
+                    selectedRectangleReferencedEnvelope.expandToInclude(realWorldBoundingRectangle);
+                    
                     Filter filter = filterFactory2.bbox(filterFactory2
                             .property(geometryContainer.getGeometryDescriptor()
                                     .getLocalName()),
@@ -173,13 +182,13 @@ public class SelectHandler {
             ReferencedEnvelope referencedEnvelope = simpleFeatureeCollection
                     .getBounds();
 
-            if (this.selectedReferencedEnvelope == null) {
+            if (this.selectedFeaturesReferencedEnvelope == null) {
 
                 setSelectedReferencedEnvelope(referencedEnvelope);
 
             } else {
 
-                this.selectedReferencedEnvelope
+                this.selectedFeaturesReferencedEnvelope
                         .expandToInclude(referencedEnvelope);
 
             }
@@ -192,15 +201,19 @@ public class SelectHandler {
         return 0;
     }
 
-    public ReferencedEnvelope getSelectedReferencedEnvelope() {
-        return selectedReferencedEnvelope;
+    public ReferencedEnvelope getSelectedFeaturesReferencedEnvelope() {
+        return selectedFeaturesReferencedEnvelope;
+    }
+    
+    public ReferencedEnvelope getSelectedRectangleReferenceEnvelope() {
+        return selectedRectangleReferencedEnvelope;
     }
 
     public int setToNullSelectedReferencedEnvelope() {
 
         try {
 
-            this.selectedReferencedEnvelope.setToNull();
+            this.selectedFeaturesReferencedEnvelope.setToNull();
             return 1;
 
         } catch (NullPointerException nullPointerException) {
@@ -218,7 +231,7 @@ public class SelectHandler {
                     "simpleFeatureeCollection must not be null!");
         }
 
-        this.selectedReferencedEnvelope = selectedReferencedEnvelope;
+        this.selectedFeaturesReferencedEnvelope = selectedReferencedEnvelope;
     }
 
     // returns list of selected screen rectangles
@@ -244,7 +257,7 @@ public class SelectHandler {
     }
 
     public BoundingBox getSelectedBoundingBox() {
-        return this.selectedReferencedEnvelope;
+        return this.selectedFeaturesReferencedEnvelope;
     }
 
     /**
@@ -536,7 +549,7 @@ public class SelectHandler {
         try {
             
             this.selectedFeatures.clear();
-            this.selectedReferencedEnvelope = new ReferencedEnvelope();
+            this.selectedFeaturesReferencedEnvelope = new ReferencedEnvelope();
 
             // get layers that we are interested in (selected)
             List<Layer> layersList = this.mapHandler.getSelectedOrVisibleLayer(

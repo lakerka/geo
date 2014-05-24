@@ -1,34 +1,20 @@
 package setsRelated;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
-import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.feature.FeatureFactory;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.feature.type.GeometryDescriptorImpl;
-import org.geotools.filter.FilterFactoryFinder;
-import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.main.Support;
-import org.geotools.process.vector.IntersectionFeatureCollection;
-import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
-import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Geometry;
 
 public class IntersectSimpleFeaturesThread implements Runnable {
 
@@ -137,6 +123,8 @@ public class IntersectSimpleFeaturesThread implements Runnable {
 
         try {
 
+            System.out.println("Starting: " + this.runnableName);
+            
             if (simpleFeatureList1.isEmpty() || simpleFeatureList2.isEmpty()) {
                 return;
             }
@@ -166,8 +154,9 @@ public class IntersectSimpleFeaturesThread implements Runnable {
 
         } finally {
 
+            System.out.println("Starting: " + this.runnableName);
             this.inverseSemaphore.taskCompleted();
-
+            
         }
     }
 
@@ -198,7 +187,6 @@ public class IntersectSimpleFeaturesThread implements Runnable {
             //
             // SimpleFeatureCollection filteredCollection = collectionToFilter
             // .subCollection(filter);
-
             try {
 
                 ReferencedEnvelope referencedEnvelope = new ReferencedEnvelope(

@@ -11,7 +11,7 @@ public class ZoomToSelectionButtonListener implements ActionListener {
 
         Main.mainWindow.zoomToSelectHandler
                 .zoomToSelect(Main.mainWindow.selectHandler
-                        .getSelectedReferencedEnvelope());
+                        .getSelectedFeaturesReferencedEnvelope());
     }
 
 }

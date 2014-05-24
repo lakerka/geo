@@ -2,12 +2,6 @@ package org.geotools.main;
 
 import handlers.ExportShapeFileAction;
 
-
-
-
-
-
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -58,39 +52,82 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         try {
-//            Filter f = CQL.toFilter("BBOX(SHAPE, 10,20,30,40)");
+            // Filter f = CQL.toFilter("BBOX(SHAPE, 10,20,30,40)");
             mainWindow = new MainWindow(null, 1200, 600);
+//            test();
+//            test2();
+            // String path = "C:\\Users\\as\\Desktop\\gis\\LTsventoji\\";
+            // SimpleFeatureSource simpleFeatureSourceKeliai = Support
+            // .loadShapeFile(path + "sven_KEL_L.shp");
+            // Layer keliaiLayer =
+            // Support.simpleFeatureSourceToLayer(simpleFeatureSourceKeliai);
+            //
+            // Main.mainWindow.addLayer(keliaiLayer);
+            // Thread.sleep(1000);
+            //
+            // SimpleFeatureCollection s =
+            // Support.layerToSimpleFeatureCollection(keliaiLayer);
+            //
+            // //minx miny maxx maxy
+            // Filter filter =
+            // ECQL.toFilter("BBOX(the_geom, 576747, 6150069,  626858, 6170876)");
+            //
+            // SimpleFeatureCollection subCollection = s.subCollection(filter);
+            // Layer newLayer =
+            // Support.simpleFeatureCollectionToLayer(subCollection);
+            // Main.mainWindow.addLayer(newLayer);
+            //
+            // GeometrySet geometrySet = new GeometrySet();
+            // geometrySet.intersect(keliaiLayer, newLayer, 4);
 
-//            String path = "C:\\Users\\as\\Desktop\\gis\\LTsventoji\\";
-//            SimpleFeatureSource simpleFeatureSourceKeliai = Support
-//                    .loadShapeFile(path + "sven_KEL_L.shp");
-//            Layer keliaiLayer = Support.simpleFeatureSourceToLayer(simpleFeatureSourceKeliai);
-//            
-//            Main.mainWindow.addLayer(keliaiLayer);
-//            Thread.sleep(1000);
-//            
-//            SimpleFeatureCollection s = Support.layerToSimpleFeatureCollection(keliaiLayer); 
-//            
-//            //minx miny maxx maxy
-//            Filter filter = ECQL.toFilter("BBOX(the_geom, 576747, 6150069,  626858, 6170876)");
-//
-//            SimpleFeatureCollection subCollection = s.subCollection(filter);
-//            Layer newLayer = Support.simpleFeatureCollectionToLayer(subCollection);
-//            Main.mainWindow.addLayer(newLayer);
-//            
-//            GeometrySet geometrySet = new GeometrySet();
-//            geometrySet.intersect(keliaiLayer, newLayer, 4);
-            
-           // long startTime = System.nanoTime();
+            // long startTime = System.nanoTime();
 
-            //Main.test();
-//            long endTime = System.nanoTime();
-//            System.out.println("Took " + (endTime - startTime) / 60000000000.0
-//                    + " min");
+            // Main.test();
+            // long endTime = System.nanoTime();
+            // System.out.println("Took " + (endTime - startTime) /
+            // 60000000000.0
+            // + " min");
 
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static void test2() {
+        String path = "C:\\Users\\as\\Desktop\\gis\\LTsventoji\\";
+        SimpleFeatureSource simpleFeatureSourceKeliai = Support
+                .loadShapeFile(path + "sven_KEL_L.shp");
+        SimpleFeatureSource simpleFeatureSourceApskritys = Support
+                .loadShapeFile(path + "sven_SAV_P.shp");
+        SimpleFeatureSource simpleFeatureSourcePlotai = Support
+                .loadShapeFile(path + "sven_PLO_P.shp");
+
+        Layer keliaiLayer = Support
+                .simpleFeatureSourceToLayer(simpleFeatureSourceKeliai);
+        Layer apskritysLayer = Support
+                .simpleFeatureSourceToLayer(simpleFeatureSourceApskritys);
+        Layer plotaiLayer= Support
+                .simpleFeatureSourceToLayer(simpleFeatureSourcePlotai);
+      
+        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer);
+//        try {
+//
+//            Thread.sleep(1000);   
+//        } catch (Exception e) {
+//            // TODO: handle exception
+//        }
+//        Main.mainWindow.mapHandler.addLayerToMapContent(plotaiLayer);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(apskritysLayer);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer);
+        
+//        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer, false);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer, false);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer, false);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer, false);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer, false);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer, false);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer, false);
+//        Main.mainWindow.mapHandler.addLayerToMapContent(apskritysLayer, true);
     }
 
     public static void test() {
@@ -101,25 +138,40 @@ public class Main {
         SimpleFeatureSource simpleFeatureSourceApskritys = Support
                 .loadShapeFile(path + "sven_SAV_P.shp");
 
+        Layer keliaiLayer = Support
+                .simpleFeatureSourceToLayer(simpleFeatureSourceKeliai);
+        Layer apskritysLayer = Support
+                .simpleFeatureSourceToLayer(simpleFeatureSourceApskritys);
+
         try {
 
-            GeometrySet geometrySet = new GeometrySet();
 
-            SimpleFeatureSource intersectSimpleFeatureSource = geometrySet
-                    .intersect(simpleFeatureSourceApskritys,simpleFeatureSourceKeliai
-                            , 1);
+            Main.mainWindow.mapHandler.addLayerToMapContent(apskritysLayer);
+//            Thread.sleep(1000);
+//            Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer);
 
-            Layer intersectLayer = Support
-                    .simpleFeatureSourceToLayer(intersectSimpleFeatureSource);
-
-            Main.mainWindow.addLayer(intersectLayer);
-            sop("Done intersecting!");
+//            Layer keliaiSameLayer = Main.mainWindow.mapHandler.getLayers().get(1);
+//            Thread.sleep(1000);
+//            keliaiSameLayer.setSelected(false);
+//            keliaiSameLayer.setVisible(false);
+            
+            // GeometrySet geometrySet = new GeometrySet();
+            //
+            // SimpleFeatureSource intersectSimpleFeatureSource = geometrySet
+            // .intersect(simpleFeatureSourceApskritys,simpleFeatureSourceKeliai
+            // , 1);
+            //
+            // Layer intersectLayer = Support
+            // .simpleFeatureSourceToLayer(intersectSimpleFeatureSource);
+            //
+            // Main.mainWindow.addLayer(intersectLayer);
+            // sop("Done intersecting!");
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        System.out.println();
+//        System.out.println();
     }
 
     public static void sop(String string) {

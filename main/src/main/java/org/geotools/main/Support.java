@@ -130,9 +130,9 @@ public class Support {
 
     public static SimpleFeatureSource loadShapeFile(File file) {
 
+        FileDataStore store = null;
         try {
 
-            FileDataStore store;
             store = FileDataStoreFinder.getDataStore(file);
             SimpleFeatureSource featureSource = store.getFeatureSource();
 
@@ -148,7 +148,7 @@ public class Support {
             }
 
             return null;
-        }
+        } 
     }
 
     public static Point getUpperLeftPoint(Point a, Point b) {
