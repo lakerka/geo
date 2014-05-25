@@ -15,7 +15,6 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-
 public class IntersectSimpleFeaturesThread implements Runnable {
 
     // private Thread thread;
@@ -53,77 +52,83 @@ public class IntersectSimpleFeaturesThread implements Runnable {
         return this.id++;
     }
 
-//    public void run() {
-//
-//        try {
-//            // System.out.println("Starting " + this.runnableName);
-//            // intersection of empty set and something will not produce any
-//            // results
-//            if (simpleFeatureList1.isEmpty() || simpleFeatureList2.isEmpty()) {
-//                return;
-//            }
-//
-//            SimpleFeatureCollection simpleCollectionFromSingleFeature = null;
-//
-//            SimpleFeatureIterator iterator = simpleFeatureList1.features();
-//            try {
-//                while (iterator.hasNext()) {
-//
-//                    SimpleFeature simpleFeatureFromCollection1 = iterator
-//                            .next();
-//
-//                    // filter second collection
-////                    SimpleFeatureCollection filteredSmpleFeatureCollection2 = filterSimpleFeatureCollection(
-////                            simpleFeatureFromCollection1, simpleFeatureList2);
-//                    SimpleFeatureCollection filteredSmpleFeatureCollection2 = simpleFeatureList2;
-//                    
-//                    // add single feature from first collection
-//                    simpleCollectionFromSingleFeature = DataUtilities
-//                            .collection(simpleFeatureFromCollection1);
-//
-//                    IntersectionFeatureCollection ifc = new IntersectionFeatureCollection();
-//                    SimpleFeatureIterator iter;
-//
-//                    SimpleFeatureCollection kk = ifc.execute(
-//                            simpleCollectionFromSingleFeature,
-//                            filteredSmpleFeatureCollection2, null, null, null,
-//                            null, null);
-//                    iter = kk.features();
-//
-//                    for (; iter.hasNext();) {
-//
-//                        SimpleFeature sf = iter.next();
-//
-//                        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(
-//                                sf.getFeatureType());
-//
-//                        builder.addAll(sf.getAttributes());
-//                        localSimpleFeatureList.add(builder.buildFeature(""
-//                                + getId()));
-//                    }
-//                }
-//            } finally {
-//                iterator.close();
-//            }
-//            this.globalIntersectSimpleFeatureList
-//                    .addAll(localSimpleFeatureList);
-//        } catch (Exception exception) {
-//
-//            exception.printStackTrace();
-//
-//        } finally {
-//
-//            this.inverseSemaphore.taskCompleted();
-//
-//            // System.out.println("Ending " + this.runnableName);
-//        }
-//    }
+    // public void run() {
+    //
+    // try {
+    // // System.out.println("Starting " + this.runnableName);
+    // // intersection of empty set and something will not produce any
+    // // results
+    // if (simpleFeatureList1.isEmpty() || simpleFeatureList2.isEmpty()) {
+    // return;
+    // }
+    //
+    // SimpleFeatureCollection simpleCollectionFromSingleFeature = null;
+    //
+    // SimpleFeatureIterator iterator = simpleFeatureList1.features();
+    // try {
+    // while (iterator.hasNext()) {
+    //
+    // SimpleFeature simpleFeatureFromCollection1 = iterator
+    // .next();
+    //
+    // // filter second collection
+    // // SimpleFeatureCollection filteredSmpleFeatureCollection2 =
+    // filterSimpleFeatureCollection(
+    // // simpleFeatureFromCollection1, simpleFeatureList2);
+    // SimpleFeatureCollection filteredSmpleFeatureCollection2 =
+    // simpleFeatureList2;
+    //
+    // // add single feature from first collection
+    // simpleCollectionFromSingleFeature = DataUtilities
+    // .collection(simpleFeatureFromCollection1);
+    //
+    // IntersectionFeatureCollection ifc = new IntersectionFeatureCollection();
+    // SimpleFeatureIterator iter;
+    //
+    // SimpleFeatureCollection kk = ifc.execute(
+    // simpleCollectionFromSingleFeature,
+    // filteredSmpleFeatureCollection2, null, null, null,
+    // null, null);
+    // iter = kk.features();
+    //
+    // for (; iter.hasNext();) {
+    //
+    // SimpleFeature sf = iter.next();
+    //
+    // SimpleFeatureBuilder builder = new SimpleFeatureBuilder(
+    // sf.getFeatureType());
+    //
+    // builder.addAll(sf.getAttributes());
+    // localSimpleFeatureList.add(builder.buildFeature(""
+    // + getId()));
+    // }
+    // }
+    // } finally {
+    // iterator.close();
+    // }
+    // this.globalIntersectSimpleFeatureList
+    // .addAll(localSimpleFeatureList);
+    // } catch (Exception exception) {
+    //
+    // exception.printStackTrace();
+    //
+    // } finally {
+    //
+    // this.inverseSemaphore.taskCompleted();
+    //
+    // // System.out.println("Ending " + this.runnableName);
+    // }
+    // }
 
     public void run() {
+        
+        boolean PRINT_START_AND_END = false;
 
         try {
-
-            System.out.println("Starting: " + this.runnableName);
+            
+            if (PRINT_START_AND_END) {
+                System.out.println("Starting: " + this.runnableName);
+            }
             
             if (simpleFeatureList1.isEmpty() || simpleFeatureList2.isEmpty()) {
                 return;
@@ -154,9 +159,11 @@ public class IntersectSimpleFeaturesThread implements Runnable {
 
         } finally {
 
-            System.out.println("Starting: " + this.runnableName);
+            if (PRINT_START_AND_END) {
+                System.out.println("Starting: " + this.runnableName);
+            }
             this.inverseSemaphore.taskCompleted();
-            
+
         }
     }
 
@@ -214,12 +221,12 @@ public class IntersectSimpleFeaturesThread implements Runnable {
 
                 // //minx miny maxx maxy
                 // "BBOX(the_geom, 576747, 6150069,  626858, 6170876)"
-                String ecqlPredicate = "BBOX(" + geometryPropertyName
-                        + "," + referencedEnvelope.getMinX() + ","
+                String ecqlPredicate = "BBOX(" + geometryPropertyName + ","
+                        + referencedEnvelope.getMinX() + ","
                         + referencedEnvelope.getMinY() + ","
                         + referencedEnvelope.getMaxX() + ","
                         + referencedEnvelope.getMaxY() + ")";
-                
+
                 Filter filter = ECQL.toFilter(ecqlPredicate);
 
                 SimpleFeatureCollection filteredCollection = collectionToFilter

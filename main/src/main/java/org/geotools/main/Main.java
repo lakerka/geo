@@ -4,9 +4,12 @@ import handlers.ExportShapeFileAction;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
+import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
+import org.geotools.data.shapefile.index.Data;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.FeatureCollection;
@@ -52,9 +55,10 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         try {
+//            System.out.println((new BigDecimal(Double.MAX_VALUE)).toPlainString());
             // Filter f = CQL.toFilter("BBOX(SHAPE, 10,20,30,40)");
             mainWindow = new MainWindow(null, 1200, 600);
-//            test();
+            test();
 //            test2();
             // String path = "C:\\Users\\as\\Desktop\\gis\\LTsventoji\\";
             // SimpleFeatureSource simpleFeatureSourceKeliai = Support
@@ -110,6 +114,19 @@ public class Main {
                 .simpleFeatureSourceToLayer(simpleFeatureSourcePlotai);
       
         Main.mainWindow.mapHandler.addLayerToMapContent(keliaiLayer);
+        
+        String pathTest = "C:\\Users\\as\\git\\geograf\\main\\test\\";
+//        Support.exportToShapeFile(layer, schemaTypeName,
+//                directory.getParentFile(), directory.getName())
+        DataStore dataStore = Support.exportToShapeFile(apskritysLayer, null, new File(pathTest), "testFailasSuIlguVardu");
+        
+        if (dataStore == null) {
+            System.out.println("IS NULL");
+        }else {
+            System.out.println("Exported!");
+        }
+//        dataStore.
+
 //        try {
 //
 //            Thread.sleep(1000);   

@@ -34,6 +34,7 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureReader;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureReaderIterator;
 import org.geotools.feature.IllegalAttributeException;
 import org.geotools.feature.NameImpl;
@@ -41,6 +42,8 @@ import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeImpl;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.FactoryFinder;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.map.FeatureLayer;
 import org.geotools.map.Layer;
 import org.geotools.process.vector.TransformProcess;
@@ -53,6 +56,7 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.util.InternationalString;
 
@@ -148,7 +152,7 @@ public class Support {
             }
 
             return null;
-        } 
+        }
     }
 
     public static Point getUpperLeftPoint(Point a, Point b) {
@@ -985,4 +989,65 @@ public class Support {
 
         return null;
     }
+
+    public static SimpleFeatureCollection filterByReferenceEnvelope(
+            Geometry geometry, SimpleFeatureCollection simpleFeatureCollection) {
+        
+        Validator.checkNullPointerPassed(geometry, simpleFeatureCollection);
+        
+        try {
+            
+            ReferencedEnvelope referencedEnvelope = JTS.toEnvelope(geometry);
+            
+            // filter villages by bounding box
+            SimpleFeatureCollection filteredCollection = filterByReferenceEnvelope(
+                    simpleFeatureCollection, referencedEnvelope);
+            
+            return filteredCollection;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public static SimpleFeatureCollection filterByReferenceEnvelope(
+            SimpleFeatureCollection simpleFeatureCollection,
+            ReferencedEnvelope referencedEnvelope) {
+
+        Validator.checkNullPointerPassed(simpleFeatureCollection,
+                referencedEnvelope);
+        try {
+          
+
+            FilterFactory2 filterFactory2 = CommonFactoryFinder
+                    .getFilterFactory2();
+
+            String geometryDescriptorLocalName = null;
+
+            Filter refEnvelopeFilter;
+
+            if (!simpleFeatureCollection.isEmpty()) {
+
+                geometryDescriptorLocalName = simpleFeatureCollection
+                        .getSchema().getGeometryDescriptor().getLocalName();
+
+                refEnvelopeFilter = filterFactory2.bbox(
+
+                filterFactory2.property(geometryDescriptorLocalName),
+                        referencedEnvelope);
+                
+                return simpleFeatureCollection.subCollection(refEnvelopeFilter);
+
+            } else {
+                return simpleFeatureCollection;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }

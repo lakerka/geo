@@ -1,17 +1,23 @@
 package handlers;
 
+import java.io.File;
 import java.lang.ref.Reference;
 import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.naming.Binding;
 
 import model.Forest;
+import model.Graph;
 import model.Lake;
+import model.LakeCollection;
 
+import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
+import org.geotools.data.shapefile.index.Data;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
@@ -140,11 +146,50 @@ public class ThirdTaskHandler {
             initCollections();
             initForestList();
             initLakesList();
-            test();
+            // test();
 
         } catch (Exception exception) {
 
             exception.printStackTrace();
+        }
+    }
+
+    private void provideGraphWithLakes() {
+
+        Validator.checkNotInitialized(this.lakeList);
+
+        try {
+
+            boolean[] lakeVisited = new boolean[lakeList.size()];
+
+            for (int j = 0; j < 3; j++) {
+
+                int maxCount = 0;
+                Lake bestLake = null;
+                
+                for (int i = 0; i < lakeList.size(); i++) {
+
+                    Lake curLake = lakeList.get(i);
+                    int curLakePointOfInterestCount = curLake.getPointOfInterestCount();
+                    
+                    if (!lakeVisited[i] && curLakePointOfInterestCount > maxCount) {
+                        
+                        bestLake = curLake;
+                        maxCount = curLakePointOfInterestCount;
+                    }
+                    
+                }
+                
+                if (bestLake != null) {
+
+                  Graph graph = new Graph(bestLake);
+                  //TODO complete with: path finder
+                }
+                
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -158,30 +203,58 @@ public class ThirdTaskHandler {
             System.out.println("lakeList is empty! Nothing to test");
         }
 
+        String pathTest = "C:\\Users\\as\\git\\geograf\\main\\test\\";
+
+        int d = 0;
         for (Lake lake : lakeList) {
 
-            if (lake.getPointOfInterestCount() >= 20) {
+            if (lake.getForestsList().size() >= 1) {
+                d++;
+                // this.mapHandler.addLayerToMapContent(Support
+                // .simpleFeatureListToLayer(lake.getBridgesList()));
+                // this.mapHandler.addLayerToMapContent(Support
+                // .simpleFeatureListToLayer(lake.getVillagesList()));
+                Layer layer = Support.simpleFeatureListToLayer(lake
+                        .getAllForestsSimpleFeatureList());
+                Support.exportToShapeFile(layer, null, new File(pathTest), d
+                        + "_forests");
 
-                this.mapHandler.addLayerToMapContent(Support
-                        .simpleFeatureListToLayer(lake.getBridgesList()));
-                this.mapHandler.addLayerToMapContent(Support
-                        .simpleFeatureListToLayer(lake.getVillagesList()));
-                this.mapHandler.addLayerToMapContent(Support
-                        .simpleFeatureListToLayer(lake
-                                .getAllForestsSimpleFeatureList()));
+                // Support.exportToShapeFile(la, typeName, directory, fileName)
+                // this.mapHandler.addLayerToMapContent(layer);
 
-                this.mapHandler
-                        .addLayerToMapContent(Support
-                                .simpleFeatureCollectionToLayer(this.villagesCollection));
-                this.mapHandler.addLayerToMapContent(Support
-                        .simpleFeatureCollectionToLayer(this.forestCollection));
+                Layer layer2 = Support
+                        .simpleFeatureCollectionToLayer(DataUtilities
+                                .collection(lake.getLakeSimpleFeature()));
+                Support.exportToShapeFile(layer2, null, new File(pathTest), d
+                        + "_lake");
+
+                // this.mapHandler.addLayerToMapContent(layer2);
+
+                // this.mapHandler
+                // .addLayerToMapContent(Support
+                // .simpleFeatureCollectionToLayer(this.villagesCollection));
+                // this.mapHandler.addLayerToMapContent(Support
+                // .simpleFeatureCollectionToLayer(this.forestCollection));
                 // this.mapHandler.addLayerToMapContent(Support
                 // .simpleFeatureCollectionToLayer(this.));
 
-                break;
+                if (d >= 4) {
+                    break;
+                }
+
             }
 
         }
+
+        Layer layer = getAllForestsLayer();
+        Support.exportToShapeFile(layer, null, new File(pathTest),
+                "all forests");
+        // this.mapHandler.addLayerToMapContent(layer);
+
+        layer = getAllLakesLayer();
+        Support.exportToShapeFile(layer, null, new File(pathTest), "all lakes");
+        // this.mapHandler.addLayerToMapContent(layer);
+
         System.out.println("DONE testing");
 
     }
@@ -216,14 +289,18 @@ public class ThirdTaskHandler {
 
             System.out.println("Lakes count: " + lakeList.size());
 
+            LakeCollection lakeCollection = getLakeCollection();
+
+            System.out.println("Started adding villages and bridges.");
             // add to villages, tests ok
-            addToNearestLake(lakeList, villagesFeatureList, 0);
+            addToNearestLake(villagesFeatureList, lakeCollection, 0);
             System.out.println("ADDED villages to lakes");
             // add to bridges
-            addToNearestLake(lakeList, bridgesFeatureList, 1);
+            addToNearestLake(bridgesFeatureList, lakeCollection, 1);
             System.out.println("ADDED bridges to lakes");
             // add forest
-            addForestsToNearestLakes();
+            System.out.println("Started adding forests.");
+            addForestsToNearestLakes(this.forestList, lakeCollection);
             System.out.println("ADDED forests to lakes");
             /*--------------TEST villages-----------*/
             // int d = 3;
@@ -257,21 +334,25 @@ public class ThirdTaskHandler {
         return 0;
     }
 
-    private int addForestsToNearestLakes() {
+    private LakeCollection getLakeCollection() {
+        return (new LakeCollection(this.lakeList));
+    }
+
+    private int addForestsToNearestLakes(List<Forest> forestsList,
+            LakeCollection lakeCollection) {
 
         Validator.checkNotInitialized(this.lakeList, this.forestList);
-
         try {
 
-            for (Forest forest : forestList) {
+            for (Forest forest : forestsList) {
 
-                Lake bestLake = getNearestLake(forest.getForestSimpleFeature());
+                Lake nearestLake = getNearestLake(
+                        forest.getForestSimpleFeature(), lakeCollection);
 
-                if (bestLake != null) {
+                if (nearestLake != null) {
 
-                    bestLake.addForest(forest);
+                    nearestLake.addForest(forest);
                 }
-
             }
 
             return 1;
@@ -282,14 +363,16 @@ public class ThirdTaskHandler {
         return 0;
     }
 
-    private int addToNearestLake(List<Lake> lakeList,
-            List<SimpleFeature> simpleFeaturesList, int collectionToAddTo) {
+    private int addToNearestLake(List<SimpleFeature> simpleFeaturesList,
+            LakeCollection lakeCollection, int collectionToAddTo) {
+
+        Validator.checkNullPointerPassed(simpleFeaturesList, lakeCollection);
 
         try {
 
             for (SimpleFeature simpleFeature : simpleFeaturesList) {
 
-                Lake bestLake = getNearestLake(simpleFeature);
+                Lake bestLake = getNearestLake(simpleFeature, lakeCollection);
 
                 if (bestLake == null) {
                     continue;
@@ -321,10 +404,12 @@ public class ThirdTaskHandler {
     }
 
     /**
-     * Get nereast lake. Lakes buffered geometry must intersect with provided
-     * geometry. return null, when no lake found.
+     * 
+     * @return Nereast lake within max distance from lake and null, when no such
+     *         lake found.
      */
-    public Lake getNearestLake(SimpleFeature simpleFeature) {
+    public Lake getNearestLake(SimpleFeature simpleFeature,
+            LakeCollection lakeCollection) {
 
         Validator.checkNullPointerPassed(simpleFeature);
 
@@ -336,31 +421,20 @@ public class ThirdTaskHandler {
             Geometry simpleFeatureGeometry = (Geometry) simpleFeature
                     .getDefaultGeometry();
 
-            ReferencedEnvelope refEnvelope = JTS
-                    .toEnvelope(simpleFeatureGeometry);
+            LakeCollection lakeCollectionFiltered = lakeCollection
+                    .filter(simpleFeature);
 
-            Geometry refEnvelopeGeometry = JTS.toGeometry(refEnvelope);
+            for (int i = 0; i < lakeCollectionFiltered.getSize(); i++) {
 
-            for (Lake lake : this.lakeList) {
+                Lake lake = lakeCollection.getLake(i);
 
-//                Geometry bufferedLakeGeometry = lake.getBufferedLakeGeometry();
+                // Geometry bufferedLakeGeometry =
+                // lake.getBufferedLakeGeometry();
                 Geometry lakeGeometry = lake.getLakeGeometry();
-
-                if (!lakeGeometry.isWithinDistance(refEnvelopeGeometry,
-                        minDistance)) {
-                    continue;
-                }
-
-                // if buffered lake doesn't intersect that mean feature is
-                // too far away from lake
-                if (!lakeGeometry.isWithinDistance(simpleFeatureGeometry,
-                        minDistance)) {
-                    continue;
-                }
 
                 double distance = lakeGeometry.distance(simpleFeatureGeometry);
 
-                if (distance < minDistance) {
+                if (distance <= minDistance) {
 
                     minDistance = distance;
                     bestLake = lake;
@@ -765,7 +839,7 @@ public class ThirdTaskHandler {
     // }
 
     /**
-     * gets bridges
+     * function for filtering all intersection points to get bridges layer
      * 
      */
     public int initBridgesLayer() {
@@ -1041,20 +1115,24 @@ public class ThirdTaskHandler {
                     + this.forestList.size());
 
             /*----------------TEST-----------------*/
-            this.mapHandler.addLayerToMapContent(Support
-                    .simpleFeatureCollectionToLayer(forestCollection));
-            this.mapHandler.addLayerToMapContent(Support
-                    .simpleFeatureCollectionToLayer(roadsInForestsCollection));
-
-            int d = 0;
-            for (int j = 0; j < forestList.size() && d < 3; j++) {
-                if (!forestList.get(j).getRoadFeatureList().isEmpty()) {
-                    this.mapHandler.addLayerToMapContent(Support
-                            .simpleFeatureListToLayer(forestList.get(j)
-                                    .getRoadFeatureList()));
-                    d++;
-                }
-            }
+            // this.mapHandler.addLayerToMapContent(Support
+            // .simpleFeatureCollectionToLayer(forestCollection));
+            // this.mapHandler.addLayerToMapContent(Support
+            // .simpleFeatureCollectionToLayer(roadsInForestsCollection));
+            //
+            // List<SimpleFeature> roads = new ArrayList<SimpleFeature>();
+            // int d = 0;
+            // for (int j = 0; j < forestList.size() && d < 3; j++) {
+            // roads.addAll(forestList.get(j).getRoadFeatureList());
+            // // if (!forestList.get(j).getRoadFeatureList().isEmpty()) {
+            // // this.mapHandler.addLayerToMapContent(Support
+            // // .simpleFeatureListToLayer(forestList.get(j)
+            // // .getRoadFeatureList()));
+            // // d++;
+            // // }
+            // }
+            // this.mapHandler.addLayerToMapContent(Support
+            // .simpleFeatureListToLayer(roads));
             /*----------------END TEST-----------------*/
 
         } catch (Exception e) {
@@ -1204,5 +1282,42 @@ public class ThirdTaskHandler {
             e.printStackTrace();
         }
         return null;
+    }
+
+    // for testing purposes
+    // gets all roads that are in Forest objects
+    private Layer getAllRoadsLayer() {
+
+        List<SimpleFeature> roads = new ArrayList<SimpleFeature>();
+
+        for (int j = 0; j < forestList.size(); j++) {
+            roads.addAll(forestList.get(j).getRoadFeatureList());
+        }
+
+        return Support.simpleFeatureListToLayer(roads);
+    }
+
+    // gets all forests that belong to lake
+    private Layer getAllForestsLayer() {
+
+        List<SimpleFeature> forests = new ArrayList<SimpleFeature>();
+
+        for (int j = 0; j < lakeList.size(); j++) {
+            forests.addAll(lakeList.get(j).getAllForestsSimpleFeatureList());
+        }
+
+        return Support.simpleFeatureListToLayer(forests);
+    }
+
+    // get all lakes from lakelist
+    private Layer getAllLakesLayer() {
+
+        List<SimpleFeature> lakes = new ArrayList<SimpleFeature>();
+
+        for (int j = 0; j < lakeList.size(); j++) {
+            lakes.add(lakeList.get(j).getLakeSimpleFeature());
+        }
+
+        return Support.simpleFeatureListToLayer(lakes);
     }
 }
