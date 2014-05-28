@@ -653,7 +653,7 @@ public class Support {
         return null;
     }
 
-    static boolean isPolygonOrMultiPolygonOrLineOrMultiLine(Class geometryType) {
+    public static boolean isPolygonOrMultiPolygonOrLineOrMultiLine(Class geometryType) {
 
         if (geometryType == null) {
             throw new IllegalArgumentException("geometryType must not be null!");
@@ -664,7 +664,7 @@ public class Support {
 
     }
 
-    static boolean isPolygonOrMultiPolygon(Class geometryType) {
+    public static boolean isPolygonOrMultiPolygon(Class geometryType) {
 
         if (geometryType == null) {
             throw new IllegalArgumentException("geometryType must not be null!");
@@ -673,8 +673,18 @@ public class Support {
         return isGeometryTypeIn(geometryType, MultiPolygon.class, Polygon.class);
 
     }
+    
+    public static boolean isPolygon(Class geometryType) {
 
-    static boolean isLineOrMultiLine(Class geometryType) {
+        if (geometryType == null) {
+            throw new IllegalArgumentException("geometryType must not be null!");
+        }
+
+        return isGeometryTypeIn(geometryType, Polygon.class);
+
+    }
+
+    public static boolean isLineOrMultiLine(Class geometryType) {
 
         if (geometryType == null) {
             throw new IllegalArgumentException("geometryType must not be null!");
@@ -685,13 +695,14 @@ public class Support {
 
     }
 
-    static boolean isGeometryTypeIn(Class test, Class... targets) {
+    @SuppressWarnings("unchecked")
+    public static boolean isGeometryTypeIn(@SuppressWarnings("rawtypes") Class test, @SuppressWarnings("rawtypes") Class... targets) {
 
         if (targets == null) {
             throw new IllegalArgumentException("targets must not be null!");
         }
 
-        for (Class target : targets) {
+        for (@SuppressWarnings("rawtypes") Class target : targets) {
 
             if (target.isAssignableFrom(test)) {
                 return true;
