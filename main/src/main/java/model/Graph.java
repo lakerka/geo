@@ -19,14 +19,12 @@ import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 public class Graph {
 
     Lake lake;
-    Geometry lakeGeometry;
     
     
     public Graph(Lake lake) {
         
         Validator.checkNullPointerPassed(lake);
         this.lake = lake;
-        this.lakeGeometry = lake.getLakeGeometry();
     }
     
     

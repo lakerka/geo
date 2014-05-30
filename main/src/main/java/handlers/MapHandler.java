@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import org.geotools.data.DataUtilities;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.main.Validator;
@@ -130,6 +131,95 @@ public class MapHandler implements MapPane {
 
         return 0;
 
+    }
+
+    public int addLayerToMapContent(
+            SimpleFeatureCollection simpleFeatureCollection, String layerTitle) {
+
+        if (simpleFeatureCollection == null) {
+            throw new IllegalArgumentException("arguments must not be null!");
+        }
+        if (mapContent == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+        if (mapFrame == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+
+        try {
+
+            return addLayerToMapContent(
+                    Support.simpleFeatureCollectionToLayer(simpleFeatureCollection),
+                    layerTitle);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return 0;
+
+    }
+
+    public int addLayerToMapContent(Layer layer, String layerTitle) {
+
+        if (layer == null) {
+            throw new IllegalArgumentException("arguments must not be null!");
+        }
+        if (mapContent == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+        if (mapFrame == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+
+        try {
+
+            return addLayerToMapContent(
+                    (SimpleFeatureSource) layer.getFeatureSource(), layerTitle);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return 0;
+
+    }
+
+    public int addLayerToMapContent(SimpleFeatureSource simpleFeatureSource,
+            String layerTitle) {
+
+        if (simpleFeatureSource == null) {
+            throw new IllegalArgumentException("arguments must not be null!");
+        }
+        if (mapContent == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+        if (mapFrame == null) {
+            throw new IllegalStateException("mapFrame must be initialized!");
+        }
+
+        try {
+
+            Style style = SLD
+                    .createSimpleStyle(simpleFeatureSource.getSchema());
+            FeatureLayer layer = new FeatureLayer(simpleFeatureSource, style);
+
+            layer.setSelected(false);
+            layer.setVisible(false);
+            layer.setTitle(layerTitle);
+
+            int result = (this.mapContent.addLayer(layer) ? 1 : 0);
+
+            return result;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
     public int addLayerToMapContent(Layer layer, boolean ignoreRepaint) {

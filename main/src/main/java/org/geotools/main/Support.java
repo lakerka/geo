@@ -40,6 +40,7 @@ import org.geotools.feature.IllegalAttributeException;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeImpl;
+import org.geotools.filter.text.cql2.CQL;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.FactoryFinder;
 import org.geotools.geometry.jts.JTS;
@@ -579,6 +580,30 @@ public class Support {
         }
     }
 
+    public static Layer simpleFeatureToLayer(SimpleFeature simpleFeature) {
+
+        if (simpleFeature == null) {
+            throw new IllegalArgumentException("simpleFeature must not null");
+        }
+
+        try {
+
+            List<SimpleFeature> simpleFeatureList = new ArrayList<SimpleFeature>();
+            simpleFeatureList.add(simpleFeature);
+
+            SimpleFeatureCollection simpleFeatureCollection = DataUtilities
+                    .collection(simpleFeatureList);
+
+            return Support
+                    .simpleFeatureCollectionToLayer(simpleFeatureCollection);
+
+        } catch (Exception exception) {
+
+            exception.printStackTrace();
+        }
+        return null;
+    }
+
     public static Layer simpleFeatureListToLayer(
             List<SimpleFeature> simpleFeatureList) {
 
@@ -653,7 +678,8 @@ public class Support {
         return null;
     }
 
-    public static boolean isPolygonOrMultiPolygonOrLineOrMultiLine(Class geometryType) {
+    public static boolean isPolygonOrMultiPolygonOrLineOrMultiLine(
+            Class geometryType) {
 
         if (geometryType == null) {
             throw new IllegalArgumentException("geometryType must not be null!");
@@ -673,7 +699,7 @@ public class Support {
         return isGeometryTypeIn(geometryType, MultiPolygon.class, Polygon.class);
 
     }
-    
+
     public static boolean isPolygon(Class geometryType) {
 
         if (geometryType == null) {
@@ -696,13 +722,16 @@ public class Support {
     }
 
     @SuppressWarnings("unchecked")
-    public static boolean isGeometryTypeIn(@SuppressWarnings("rawtypes") Class test, @SuppressWarnings("rawtypes") Class... targets) {
+    public static boolean isGeometryTypeIn(
+            @SuppressWarnings("rawtypes") Class test,
+            @SuppressWarnings("rawtypes") Class... targets) {
 
         if (targets == null) {
             throw new IllegalArgumentException("targets must not be null!");
         }
 
-        for (@SuppressWarnings("rawtypes") Class target : targets) {
+        for (@SuppressWarnings("rawtypes")
+        Class target : targets) {
 
             if (target.isAssignableFrom(test)) {
                 return true;
@@ -1003,25 +1032,25 @@ public class Support {
 
     public static SimpleFeatureCollection filterByReferenceEnvelope(
             Geometry geometry, SimpleFeatureCollection simpleFeatureCollection) {
-        
+
         Validator.checkNullPointerPassed(geometry, simpleFeatureCollection);
-        
+
         try {
-            
+
             ReferencedEnvelope referencedEnvelope = JTS.toEnvelope(geometry);
-            
+
             // filter villages by bounding box
             SimpleFeatureCollection filteredCollection = filterByReferenceEnvelope(
                     simpleFeatureCollection, referencedEnvelope);
-            
+
             return filteredCollection;
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-    
+
     public static SimpleFeatureCollection filterByReferenceEnvelope(
             SimpleFeatureCollection simpleFeatureCollection,
             ReferencedEnvelope referencedEnvelope) {
@@ -1029,7 +1058,6 @@ public class Support {
         Validator.checkNullPointerPassed(simpleFeatureCollection,
                 referencedEnvelope);
         try {
-          
 
             FilterFactory2 filterFactory2 = CommonFactoryFinder
                     .getFilterFactory2();
@@ -1047,7 +1075,7 @@ public class Support {
 
                 filterFactory2.property(geometryDescriptorLocalName),
                         referencedEnvelope);
-                
+
                 return simpleFeatureCollection.subCollection(refEnvelopeFilter);
 
             } else {
@@ -1059,6 +1087,95 @@ public class Support {
         }
 
         return null;
+    }
+
+    public static List<SimpleFeature> getFilteredFeaturesList(
+            SimpleFeatureCollection simpleFeatureCollection, String cqlPredicate) {
+
+        Validator.checkNullPointerPassed(simpleFeatureCollection, cqlPredicate);
+        if (cqlPredicate.isEmpty()) {
+            throw new IllegalArgumentException("Empty cql!");
+        }
+
+        try {
+
+            return DataUtilities
+                    .list(getFilteredFeaturesSimpleFeatureCollection(
+                            simpleFeatureCollection, cqlPredicate));
+
+        } catch (Exception exception) {
+
+            exception.printStackTrace();
+
+        }
+
+        return null;
+
+    }
+
+    public static SimpleFeatureCollection getFilteredFeaturesSimpleFeatureCollection(
+            SimpleFeatureCollection simpleFeatureCollection, String cqlPredicate) {
+
+        Validator.checkNullPointerPassed(simpleFeatureCollection, cqlPredicate);
+        if (cqlPredicate.isEmpty()) {
+            throw new IllegalArgumentException("Empty cql!");
+        }
+
+        try {
+
+            Filter filter = CQL.toFilter(cqlPredicate);
+            SimpleFeatureCollection features = simpleFeatureCollection
+                    .subCollection(filter);
+            return features;
+
+        } catch (Exception exception) {
+
+            exception.printStackTrace();
+
+        }
+        return null;
+    }
+
+    public static List<SimpleFeature> getFilteredFeaturesList(
+            SimpleFeatureCollection simpleFeatureCollection, Filter filter) {
+
+        Validator.checkNullPointerPassed(simpleFeatureCollection, filter);
+
+        try {
+
+            return DataUtilities
+                    .list(getFilteredFeaturesSimpleFeatureCollection(
+                            simpleFeatureCollection, filter));
+
+        } catch (Exception exception) {
+
+            exception.printStackTrace();
+
+        }
+
+        return null;
+
+    }
+
+    public static SimpleFeatureCollection getFilteredFeaturesSimpleFeatureCollection(
+            SimpleFeatureCollection simpleFeatureCollection, Filter filter) {
+
+        Validator.checkNullPointerPassed(simpleFeatureCollection, filter);
+
+        try {
+
+            SimpleFeatureCollection features = simpleFeatureCollection
+                    .subCollection(filter);
+            return features;
+
+        } catch (Exception exception) {
+
+            exception.printStackTrace();
+
+        }
+
+        return null;
+
     }
 
 }

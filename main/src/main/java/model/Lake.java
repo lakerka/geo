@@ -115,6 +115,10 @@ public class Lake {
     public List<SimpleFeature> getBridgesList() {
         return this.bridgesList;
     }
+    
+    public SimpleFeatureCollection getBridgesSimpleFeatureCollection() {
+        return DataUtilities.collection(this.bridgesList);
+    }
 
     public List<Forest> getForestsList() {
         return this.forestsList;
@@ -133,10 +137,26 @@ public class Lake {
 
         return forestSimpleFeatureList;
     }
+    
+    public SimpleFeatureCollection getAllForestsSimpleFeatureCollection() {
+
+        return DataUtilities.collection(getAllForestsSimpleFeatureList());
+    }
 
     
     public SimpleFeature getLakeSimpleFeature() {
         return this.lakeSimpleFeature;
+    }
+    
+    public SimpleFeatureCollection getAllRoadsCollection() {
+        
+        List<SimpleFeature> roadSimpleFeatureList = new ArrayList<SimpleFeature>();
+        
+        for (Forest forest : forestsList) {
+            roadSimpleFeatureList.addAll( forest.getRoadFeatureList() );
+        }
+        
+        return DataUtilities.collection(roadSimpleFeatureList);
     }
     
 }

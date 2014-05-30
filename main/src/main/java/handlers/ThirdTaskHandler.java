@@ -146,6 +146,7 @@ public class ThirdTaskHandler {
             initCollections();
             initForestList();
             initLakesList();
+            presentation();
             // test();
 
         } catch (Exception exception) {
@@ -166,31 +167,90 @@ public class ThirdTaskHandler {
 
                 int maxCount = 0;
                 Lake bestLake = null;
-                
+
                 for (int i = 0; i < lakeList.size(); i++) {
 
                     Lake curLake = lakeList.get(i);
-                    int curLakePointOfInterestCount = curLake.getPointOfInterestCount();
-                    
-                    if (!lakeVisited[i] && curLakePointOfInterestCount > maxCount) {
-                        
+                    int curLakePointOfInterestCount = curLake
+                            .getPointOfInterestCount();
+
+                    if (!lakeVisited[i]
+                            && curLakePointOfInterestCount > maxCount) {
+
                         bestLake = curLake;
                         maxCount = curLakePointOfInterestCount;
                     }
-                    
+
                 }
-                
+
                 if (bestLake != null) {
 
-                  Graph graph = new Graph(bestLake);
-                  //TODO complete with: path finder
+                    Graph graph = new Graph(bestLake);
+                    // TODO complete with: path finder
                 }
-                
+
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void presentation() {
+        
+         String pathSventoji =
+         "C:\\Users\\as\\Desktop\\gis\\LTsventoji\\";
+
+        GeometrySet geometrySet = new GeometrySet();
+
+        // get lakes
+        SimpleFeatureSource savSimpleFeatureSource = Support
+                .loadShapeFile(pathSventoji + "sven_SAV_P.shp");
+
+        
+        Main.mainWindow.mapHandler.addLayerToMapContent(savSimpleFeatureSource, "savivaldybes");
+        
+        Main.mainWindow.mapHandler.addLayerToMapContent( this.villagesCollection , "all villages");
+        
+        Main.mainWindow.mapHandler.addLayerToMapContent( this.bridgesCollection , "all bridges" );
+        Main.mainWindow.mapHandler.addLayerToMapContent( this.forestCollection ,  "all forests");
+        Main.mainWindow.mapHandler.addLayerToMapContent( this.lakesCollection, "all lakes");
+        Main.mainWindow.mapHandler.addLayerToMapContent( this.roadsInForestsCollection, "all roads in forests" );
+        
+        
+        int i = 0;
+        for (Lake lake : this.lakeList) {
+         
+            
+            
+            if (lake.getPointOfInterestCount() > 0) {
+                
+                i++;
+                
+                this.mapHandler.addLayerToMapContent(Support.simpleFeatureToLayer(lake.getLakeSimpleFeature()), i + "_lake");
+                this.mapHandler.addLayerToMapContent(Support.simpleFeatureToLayer(lake.getBufferedLakeSimpleFeature()), i + "_buffered lake");
+                
+                if (lake.getVillagesCollection().size() > 0)
+                this.mapHandler.addLayerToMapContent(lake.getVillagesCollection(), i + "_villages");
+                
+                if (lake.getBridgesSimpleFeatureCollection().size() > 0)
+                this.mapHandler.addLayerToMapContent(lake.getBridgesSimpleFeatureCollection(), i + "_bridges");
+                
+                if (lake.getAllForestsSimpleFeatureCollection().size() > 0)
+                this.mapHandler.addLayerToMapContent(lake.getAllForestsSimpleFeatureCollection(), i + "_forests");
+                
+                if (lake.getAllRoadsCollection().size() > 0)
+                this.mapHandler.addLayerToMapContent(lake.getAllRoadsCollection(), i + "_roads");
+//                this.mapHandler.addLayerToMapContent(, i + "_villages");
+                
+                
+            }
+            
+            if (i == 2) {
+                break;
+            }
+        }
+        
     }
 
     private void test() {

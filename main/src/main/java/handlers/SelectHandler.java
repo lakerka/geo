@@ -42,7 +42,7 @@ import org.geotools.map.Layer;
 public class SelectHandler {
 
     private static final boolean MUST_BE_VISIBLE = true;
-    private static final boolean MUST_BE_SELECTED = false;
+    private static final boolean MUST_BE_SELECTED = true;
 
     public static final int MIN_SELECTED_RECT_SIZE = 2;
 

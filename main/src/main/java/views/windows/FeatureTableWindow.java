@@ -164,7 +164,7 @@ public class FeatureTableWindow extends JFrame {
     public void addLayersThatAreInMap() {
 
         clearLayerListAndSelectedLayer();
-        List<Layer> mapLayers = this.mapHandler.getSelectedOrVisibleLayer(true, false);
+        List<Layer> mapLayers = this.mapHandler.getSelectedOrVisibleLayer(false, true);
 
         for (Layer layer : mapLayers) {
 
